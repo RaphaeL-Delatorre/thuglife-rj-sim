@@ -66,34 +66,35 @@
 
 :root {
   --radius: 0.5rem;
-  --background: oklch(0.16 0.018 160);
-  --foreground: oklch(0.96 0.01 95);
-  --card: oklch(0.21 0.022 160);
-  --card-foreground: oklch(0.96 0.01 95);
-  --popover: oklch(0.21 0.022 160);
-  --popover-foreground: oklch(0.96 0.01 95);
-  --primary: oklch(0.82 0.16 88);
-  --primary-foreground: oklch(0.17 0.03 120);
-  --secondary: oklch(0.28 0.05 155);
-  --secondary-foreground: oklch(0.95 0.02 95);
-  --muted: oklch(0.24 0.02 160);
-  --muted-foreground: oklch(0.72 0.02 130);
-  --accent: oklch(0.55 0.13 155);
-  --accent-foreground: oklch(0.97 0.01 95);
+  --background: oklch(0.13 0.008 20);
+  --foreground: oklch(0.98 0 0);
+  --card: oklch(0.17 0.012 20 / 0.72);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.17 0.012 20);
+  --popover-foreground: oklch(0.98 0 0);
+  --primary: oklch(0.58 0.245 27);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.24 0.02 20);
+  --secondary-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.2 0.012 20);
+  --muted-foreground: oklch(0.76 0.008 20);
+  --accent: oklch(0.58 0.245 27);
+  --accent-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.6 0.21 28);
   --destructive-foreground: oklch(0.98 0.003 248);
-  --border: oklch(0.32 0.03 155);
-  --input: oklch(0.28 0.03 155);
-  --ring: oklch(0.82 0.16 88);
-  --surface-elevated: oklch(0.24 0.025 160);
+  --border: oklch(1 0 0 / 0.14);
+  --input: oklch(1 0 0 / 0.16);
+  --ring: oklch(0.58 0.245 27);
+  --surface-elevated: oklch(0.17 0.015 20 / 0.6);
   --gradient-hero: linear-gradient(
     180deg,
-    oklch(0.16 0.018 160 / 0.15) 0%,
-    oklch(0.16 0.018 160 / 0.75) 55%,
-    oklch(0.16 0.018 160) 100%
+    oklch(0.1 0.01 20 / 0.35) 0%,
+    oklch(0.1 0.01 20 / 0.72) 55%,
+    oklch(0.1 0.01 20 / 0.95) 100%
   );
-  --gradient-gold: linear-gradient(100deg, oklch(0.88 0.15 92), oklch(0.72 0.15 70));
-  --shadow-glow: 0 0 0 1px oklch(0.82 0.16 88 / 0.25), 0 18px 50px -12px oklch(0.82 0.16 88 / 0.35);
+  --gradient-gold: linear-gradient(100deg, oklch(0.62 0.25 27), oklch(0.46 0.2 25));
+  --gradient-red: linear-gradient(100deg, oklch(0.62 0.25 27), oklch(0.4 0.19 24));
+  --shadow-glow: 0 0 0 1px oklch(0.58 0.245 27 / 0.4), 0 18px 60px -12px oklch(0.58 0.245 27 / 0.55);
   --shadow-card: 0 20px 45px -25px oklch(0 0 0 / 0.9);
   --font-display: "Anton", "Arial Black", sans-serif;
   --font-body: "Barlow", system-ui, sans-serif;
@@ -156,4 +157,43 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+}
+
+/* Global cinematic background layers */
+@utility bg-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transform: scale(1.08);
+  animation: tl-kenburns 32s infinite;
+  will-change: opacity, transform;
+}
+
+@keyframes tl-kenburns {
+  0% { opacity: 0; transform: scale(1.02); }
+  4% { opacity: 1; }
+  25% { opacity: 1; transform: scale(1.14); }
+  29% { opacity: 0; transform: scale(1.16); }
+  100% { opacity: 0; transform: scale(1.02); }
+}
+
+@utility tl-scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    oklch(0 0 0 / 0.35) 0px,
+    oklch(0 0 0 / 0.35) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}
+
+@utility text-stroke-red {
+  -webkit-text-stroke: 1.5px oklch(0.58 0.245 27);
+  color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-slide { animation-duration: 0s; }
 }
