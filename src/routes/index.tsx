@@ -104,11 +104,40 @@ function Index() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <div className="min-h-screen bg-background font-body text-foreground">
+    <div className="relative min-h-screen font-body text-foreground">
+      {/* Background cinematográfico global */}
+      <div aria-hidden className="fixed inset-0 -z-10 overflow-hidden bg-background">
+        {bgSlides.map((src, i) => (
+          <div
+            key={src}
+            className="bg-slide"
+            style={{ backgroundImage: `url(${src})`, animationDelay: `${i * 8}s` }}
+          />
+        ))}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(120% 80% at 50% 0%, oklch(0.58 0.245 27 / 0.28) 0%, transparent 55%), linear-gradient(180deg, oklch(0.09 0.01 20 / 0.82), oklch(0.09 0.01 20 / 0.94))",
+          }}
+        />
+        <div className="tl-scanlines absolute inset-0 opacity-40 mix-blend-overlay" />
+        <div
+          className="absolute inset-0"
+          style={{ background: "radial-gradient(100% 100% at 50% 50%, transparent 45%, oklch(0 0 0 / 0.85) 100%)" }}
+        />
+      </div>
+
       <header className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <a href="#home" className="flex items-center gap-3">
-            <img src={logoImg} alt="Logo Thug Life RJ" width={44} height={44} className="h-11 w-11" />
+            <img
+              src={logoImg}
+              alt="Logo Thug Life RJ"
+              width={44}
+              height={44}
+              className="h-11 w-11 rounded-md object-cover ring-1 ring-primary/50"
+            />
             <span className="font-display text-lg tracking-wide">THUG LIFE RJ</span>
           </a>
           <ul className="hidden items-center gap-8 text-sm font-semibold uppercase tracking-widest md:flex">
@@ -127,22 +156,32 @@ function Index() {
       </header>
 
       <section id="home" className="relative flex min-h-screen items-center overflow-hidden">
-        <img
-          src={heroImg}
-          alt="Vista noturna do Rio de Janeiro no servidor Thug Life RJ"
-          width={1920}
-          height={1088}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
+        <div className="pointer-events-none absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
         <div className="relative mx-auto w-full max-w-6xl px-5 pt-28 pb-20">
-          <span className="inline-block rounded-full border border-primary/50 px-4 py-1 text-xs font-bold uppercase tracking-[0.25em] text-primary">
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/60 bg-background/50 px-4 py-1 text-xs font-bold uppercase tracking-[0.25em] text-primary backdrop-blur">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
             Mais de 10 anos no Ar · TL Reina
           </span>
-          <h1 className="mt-6 max-w-3xl font-display text-5xl leading-[0.95] uppercase sm:text-6xl lg:text-7xl">
-            A <span className="text-primary">Thug Life RJ</span> escreve a História na temática{" "}
-            <span className="text-primary">Baque RJ</span> há mais de <span className="text-primary">10 anos</span>.
+          <h1 className="mt-7 max-w-4xl font-display text-[2.6rem] uppercase leading-[0.92] tracking-tight sm:text-6xl lg:text-[5rem]">
+            <span className="block text-muted-foreground/80 text-[0.42em] tracking-[0.4em]">A cidade que não dorme</span>
+            <span
+              className="mt-3 block bg-clip-text text-transparent drop-shadow-[0_8px_30px_oklch(0.58_0.245_27/0.45)]"
+              style={{ backgroundImage: "linear-gradient(180deg, oklch(1 0 0) 35%, oklch(0.78 0.02 20) 100%)" }}
+            >
+              A Thug Life RJ
+            </span>
+            <span className="mt-1 block text-[0.52em] font-normal tracking-wide text-foreground/90">
+              escreve a História na temática{" "}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: "var(--gradient-red)" }}
+              >
+                Baque RJ
+              </span>{" "}
+              há mais de <span className="text-stroke-red">10 anos</span>
+            </span>
           </h1>
+          <div className="mt-6 h-px w-40 bg-gradient-to-r from-primary to-transparent" />
           <p className="mt-6 max-w-xl text-lg text-muted-foreground">
             Uma cidade viva do morro à orla: facções, corporações, negócios legais e ilegais, e uma comunidade
             que não para de crescer.
