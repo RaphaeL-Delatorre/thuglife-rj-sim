@@ -1,15 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import logoImg from "@/assets/logo.png";
 import heroAsset from "@/assets/tl.png.asset.json";
 import news1Asset from "@/assets/tl-2.png.asset.json";
 import news2Asset from "@/assets/tl-3.png.asset.json";
 import news3Asset from "@/assets/tl-4.png.asset.json";
+import logoAsset from "@/assets/logo-tl.png.asset.json";
 
-const heroImg = heroAsset.url;
-const news1 = news1Asset.url;
-const news2 = news2Asset.url;
-const news3 = news3Asset.url;
+const logoImg = logoAsset.url;
+const bgSlides = [heroAsset.url, news1Asset.url, news2Asset.url, news3Asset.url];
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -53,19 +51,16 @@ const stats = [
 
 const news = [
   {
-    img: news1,
     tag: "Servidor",
     title: "Novo sistema de rachas noturnos na Zona Sul",
     text: "Circuitos fechados, apostas entre crews e recompensa por reputação. As pistas abrem toda sexta, 22h, com fiscalização policial dinâmica.",
   },
   {
-    img: news2,
     tag: "Atualização",
     title: "Aeromóvel policial e novo protocolo de operações",
     text: "As forças de segurança ganharam suporte aéreo, perseguição por rota e comunicação integrada entre batalhões dentro da cidade.",
   },
   {
-    img: news3,
     tag: "Evento",
     title: "Verão TLRJ: temporada de eventos na orla",
     text: "Quiosques jogáveis, campeonatos de futevôlei, shows ao vivo e empregos temporários exclusivos durante toda a temporada.",
@@ -102,11 +97,40 @@ function Index() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <div className="min-h-screen bg-background font-body text-foreground">
+    <div className="relative min-h-screen font-body text-foreground">
+      {/* Background cinematográfico global */}
+      <div aria-hidden className="fixed inset-0 -z-10 overflow-hidden bg-background">
+        {bgSlides.map((src, i) => (
+          <div
+            key={src}
+            className="bg-slide"
+            style={{ backgroundImage: `url(${src})`, animationDelay: `${i * 8}s` }}
+          />
+        ))}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(120% 80% at 50% 0%, oklch(0.58 0.245 27 / 0.28) 0%, transparent 55%), linear-gradient(180deg, oklch(0.09 0.01 20 / 0.82), oklch(0.09 0.01 20 / 0.94))",
+          }}
+        />
+        <div className="tl-scanlines absolute inset-0 opacity-40 mix-blend-overlay" />
+        <div
+          className="absolute inset-0"
+          style={{ background: "radial-gradient(100% 100% at 50% 50%, transparent 45%, oklch(0 0 0 / 0.85) 100%)" }}
+        />
+      </div>
+
       <header className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <a href="#home" className="flex items-center gap-3">
-            <img src={logoImg} alt="Logo Thug Life RJ" width={44} height={44} className="h-11 w-11" />
+            <img
+              src={logoImg}
+              alt="Logo Thug Life RJ"
+              width={44}
+              height={44}
+              className="h-11 w-11 rounded-md object-cover ring-1 ring-primary/50"
+            />
             <span className="font-display text-lg tracking-wide">THUG LIFE RJ</span>
           </a>
           <ul className="hidden items-center gap-8 text-sm font-semibold uppercase tracking-widest md:flex">
@@ -125,22 +149,32 @@ function Index() {
       </header>
 
       <section id="home" className="relative flex min-h-screen items-center overflow-hidden">
-        <img
-          src={heroImg}
-          alt="Vista noturna do Rio de Janeiro no servidor Thug Life RJ"
-          width={1920}
-          height={1088}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
+        <div className="pointer-events-none absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
         <div className="relative mx-auto w-full max-w-6xl px-5 pt-28 pb-20">
-          <span className="inline-block rounded-full border border-primary/50 px-4 py-1 text-xs font-bold uppercase tracking-[0.25em] text-primary">
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/60 bg-background/50 px-4 py-1 text-xs font-bold uppercase tracking-[0.25em] text-primary backdrop-blur">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
             Mais de 10 anos no Ar · TL Reina
           </span>
-          <h1 className="mt-6 max-w-3xl font-display text-5xl leading-[0.95] uppercase sm:text-6xl lg:text-7xl">
-            A <span className="text-primary">Thug Life RJ</span> escreve a História na temática{" "}
-            <span className="text-primary">Baque RJ</span> há mais de <span className="text-primary">10 anos</span>.
+          <h1 className="mt-7 max-w-4xl font-display text-[2.6rem] uppercase leading-[0.92] tracking-tight sm:text-6xl lg:text-[5rem]">
+            <span className="block text-muted-foreground/80 text-[0.42em] tracking-[0.4em]">A cidade que não dorme</span>
+            <span
+              className="mt-3 block bg-clip-text text-transparent drop-shadow-[0_8px_30px_oklch(0.58_0.245_27/0.45)]"
+              style={{ backgroundImage: "linear-gradient(180deg, oklch(1 0 0) 35%, oklch(0.78 0.02 20) 100%)" }}
+            >
+              A Thug Life RJ
+            </span>
+            <span className="mt-1 block text-[0.52em] font-normal tracking-wide text-foreground/90">
+              escreve a História na temática{" "}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: "var(--gradient-red)" }}
+              >
+                Baque RJ
+              </span>{" "}
+              há mais de <span className="text-stroke-red">10 anos</span>
+            </span>
           </h1>
+          <div className="mt-6 h-px w-40 bg-gradient-to-r from-primary to-transparent" />
           <p className="mt-6 max-w-xl text-lg text-muted-foreground">
             Uma cidade viva do morro à orla: facções, corporações, negócios legais e ilegais, e uma comunidade
             que não para de crescer.
@@ -185,16 +219,9 @@ function Index() {
           {news.map((n) => (
             <article
               key={n.title}
-              className="group overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-card)] transition-colors hover:border-primary/60"
+              className="group relative overflow-hidden rounded-xl border border-border bg-card/80 shadow-[var(--shadow-card)] backdrop-blur-md transition-all hover:-translate-y-1 hover:border-primary/70 hover:shadow-[var(--shadow-glow)]"
             >
-              <img
-                src={n.img}
-                alt={n.title}
-                loading="lazy"
-                width={1280}
-                height={800}
-                className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
+              <div className="absolute inset-x-0 top-0 h-1" style={{ background: "var(--gradient-red)" }} />
               <div className="p-6">
                 <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">{n.tag}</span>
                 <h3 className="mt-2 font-display text-xl uppercase leading-tight">{n.title}</h3>
@@ -205,7 +232,7 @@ function Index() {
         </div>
       </section>
 
-      <section id="jogar" className="border-y border-border bg-surface-elevated py-24">
+      <section id="jogar" className="border-y border-border bg-surface-elevated py-24 backdrop-blur-md">
         <div className="mx-auto max-w-6xl px-5">
           <h2 className="font-display text-4xl uppercase sm:text-5xl">Jogue com a gente</h2>
           <p className="mt-3 max-w-2xl text-muted-foreground">
@@ -213,14 +240,17 @@ function Index() {
           </p>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {requisitos.map((r) => (
-              <div key={r.n} className="rounded-xl border border-border bg-card p-6">
+              <div
+                key={r.n}
+                className="rounded-xl border border-border bg-card/80 p-6 backdrop-blur transition-colors hover:border-primary/60"
+              >
                 <span className="font-display text-3xl text-primary">{r.n}</span>
                 <h3 className="mt-3 font-display text-lg uppercase">{r.t}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">{r.d}</p>
               </div>
             ))}
           </div>
-          <div className="mt-10 flex flex-wrap items-center gap-4 rounded-xl border border-primary/40 bg-card p-6">
+          <div className="mt-10 flex flex-wrap items-center gap-4 rounded-xl border border-primary/50 bg-card/85 p-6 shadow-[var(--shadow-glow)] backdrop-blur">
             <div className="flex-1">
               <h3 className="font-display text-2xl uppercase">Pronto pro corre?</h3>
               <p className="text-sm text-muted-foreground">
@@ -242,7 +272,10 @@ function Index() {
         <h2 className="font-display text-4xl uppercase sm:text-5xl">Dúvidas frequentes</h2>
         <div className="mt-8 space-y-3">
           {faq.map((f, i) => (
-            <div key={f.q} className="overflow-hidden rounded-lg border border-border bg-card">
+            <div
+              key={f.q}
+              className="overflow-hidden rounded-lg border border-border bg-card/80 backdrop-blur transition-colors hover:border-primary/60"
+            >
               <button
                 onClick={() => setOpen(open === i ? null : i)}
                 className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left font-semibold"
@@ -259,7 +292,14 @@ function Index() {
 
       <footer className="border-t border-border py-10">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-5 text-center">
-          <img src={logoImg} alt="Logo Thug Life RJ" loading="lazy" width={48} height={48} className="h-12 w-12" />
+          <img
+            src={logoImg}
+            alt="Logo Thug Life RJ"
+            loading="lazy"
+            width={72}
+            height={72}
+            className="h-18 w-18 rounded-lg object-cover ring-1 ring-primary/40"
+          />
           <p className="font-display text-lg uppercase tracking-wide">Thug Life RJ</p>
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} Thug Life RJ. Servidor de roleplay não afiliado à Rockstar Games ou Take-Two.
