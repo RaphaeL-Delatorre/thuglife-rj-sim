@@ -7,10 +7,6 @@ import news3Asset from "@/assets/tl-4.png.asset.json";
 import logoAsset from "@/assets/logo-tl.png.asset.json";
 
 const logoImg = logoAsset.url;
-const news1 = news1Asset.url;
-const news2 = news2Asset.url;
-const news3 = news3Asset.url;
-
 const bgSlides = [heroAsset.url, news1Asset.url, news2Asset.url, news3Asset.url];
 
 export const Route = createFileRoute("/")({
