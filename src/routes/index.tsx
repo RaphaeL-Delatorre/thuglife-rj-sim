@@ -55,19 +55,16 @@ const stats = [
 
 const news = [
   {
-    img: news1,
     tag: "Servidor",
     title: "Novo sistema de rachas noturnos na Zona Sul",
     text: "Circuitos fechados, apostas entre crews e recompensa por reputação. As pistas abrem toda sexta, 22h, com fiscalização policial dinâmica.",
   },
   {
-    img: news2,
     tag: "Atualização",
     title: "Aeromóvel policial e novo protocolo de operações",
     text: "As forças de segurança ganharam suporte aéreo, perseguição por rota e comunicação integrada entre batalhões dentro da cidade.",
   },
   {
-    img: news3,
     tag: "Evento",
     title: "Verão TLRJ: temporada de eventos na orla",
     text: "Quiosques jogáveis, campeonatos de futevôlei, shows ao vivo e empregos temporários exclusivos durante toda a temporada.",
@@ -226,16 +223,9 @@ function Index() {
           {news.map((n) => (
             <article
               key={n.title}
-              className="group overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-card)] transition-colors hover:border-primary/60"
+              className="group relative overflow-hidden rounded-xl border border-border bg-card/80 shadow-[var(--shadow-card)] backdrop-blur-md transition-all hover:-translate-y-1 hover:border-primary/70 hover:shadow-[var(--shadow-glow)]"
             >
-              <img
-                src={n.img}
-                alt={n.title}
-                loading="lazy"
-                width={1280}
-                height={800}
-                className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
+              <div className="absolute inset-x-0 top-0 h-1" style={{ background: "var(--gradient-red)" }} />
               <div className="p-6">
                 <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">{n.tag}</span>
                 <h3 className="mt-2 font-display text-xl uppercase leading-tight">{n.title}</h3>
