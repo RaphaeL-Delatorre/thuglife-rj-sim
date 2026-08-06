@@ -272,7 +272,10 @@ function Index() {
         <h2 className="font-display text-4xl uppercase sm:text-5xl">Dúvidas frequentes</h2>
         <div className="mt-8 space-y-3">
           {faq.map((f, i) => (
-            <div key={f.q} className="overflow-hidden rounded-lg border border-border bg-card">
+            <div
+              key={f.q}
+              className="overflow-hidden rounded-lg border border-border bg-card/80 backdrop-blur transition-colors hover:border-primary/60"
+            >
               <button
                 onClick={() => setOpen(open === i ? null : i)}
                 className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left font-semibold"
