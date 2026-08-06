@@ -232,7 +232,7 @@ function Index() {
         </div>
       </section>
 
-      <section id="jogar" className="border-y border-border bg-surface-elevated py-24">
+      <section id="jogar" className="border-y border-border bg-surface-elevated py-24 backdrop-blur-md">
         <div className="mx-auto max-w-6xl px-5">
           <h2 className="font-display text-4xl uppercase sm:text-5xl">Jogue com a gente</h2>
           <p className="mt-3 max-w-2xl text-muted-foreground">
@@ -240,14 +240,17 @@ function Index() {
           </p>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {requisitos.map((r) => (
-              <div key={r.n} className="rounded-xl border border-border bg-card p-6">
+              <div
+                key={r.n}
+                className="rounded-xl border border-border bg-card/80 p-6 backdrop-blur transition-colors hover:border-primary/60"
+              >
                 <span className="font-display text-3xl text-primary">{r.n}</span>
                 <h3 className="mt-3 font-display text-lg uppercase">{r.t}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">{r.d}</p>
               </div>
             ))}
           </div>
-          <div className="mt-10 flex flex-wrap items-center gap-4 rounded-xl border border-primary/40 bg-card p-6">
+          <div className="mt-10 flex flex-wrap items-center gap-4 rounded-xl border border-primary/50 bg-card/85 p-6 shadow-[var(--shadow-glow)] backdrop-blur">
             <div className="flex-1">
               <h3 className="font-display text-2xl uppercase">Pronto pro corre?</h3>
               <p className="text-sm text-muted-foreground">
@@ -286,7 +289,14 @@ function Index() {
 
       <footer className="border-t border-border py-10">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-5 text-center">
-          <img src={logoImg} alt="Logo Thug Life RJ" loading="lazy" width={48} height={48} className="h-12 w-12" />
+          <img
+            src={logoImg}
+            alt="Logo Thug Life RJ"
+            loading="lazy"
+            width={72}
+            height={72}
+            className="h-18 w-18 rounded-lg object-cover ring-1 ring-primary/40"
+          />
           <p className="font-display text-lg uppercase tracking-wide">Thug Life RJ</p>
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} Thug Life RJ. Servidor de roleplay não afiliado à Rockstar Games ou Take-Two.
