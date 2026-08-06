@@ -1,10 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import heroImg from "@/assets/hero-rio.jpg";
 import logoImg from "@/assets/logo.png";
-import news1 from "@/assets/news-1.jpg";
-import news2 from "@/assets/news-2.jpg";
-import news3 from "@/assets/news-3.jpg";
+import heroAsset from "@/assets/tl.png.asset.json";
+import news1Asset from "@/assets/tl-2.png.asset.json";
+import news2Asset from "@/assets/tl-3.png.asset.json";
+import news3Asset from "@/assets/tl-4.png.asset.json";
+
+const heroImg = heroAsset.url;
+const news1 = news1Asset.url;
+const news2 = news2Asset.url;
+const news3 = news3Asset.url;
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -41,9 +46,9 @@ export const Route = createFileRoute("/")({
 
 const stats = [
   { value: "10+", label: "Anos", sub: "no ar" },
-  { value: "38K", label: "Jogadores", sub: "registrados" },
-  { value: "+150K", label: "Membros", sub: "no Discord" },
-  { value: "+900", label: "Players", sub: "simultâneos" },
+  { value: "+100K", label: "Jogadores", sub: "registrados" },
+  { value: "+60K", label: "Membros", sub: "no Discord" },
+  { value: "+500", label: "Players", sub: "simultâneos" },
 ];
 
 const news = [
@@ -130,11 +135,11 @@ function Index() {
         <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
         <div className="relative mx-auto w-full max-w-6xl px-5 pt-28 pb-20">
           <span className="inline-block rounded-full border border-primary/50 px-4 py-1 text-xs font-bold uppercase tracking-[0.25em] text-primary">
-            Desde 2015 · FiveM Brasil
+            Mais de 10 anos no Ar · TL Reina
           </span>
           <h1 className="mt-6 max-w-3xl font-display text-5xl leading-[0.95] uppercase sm:text-6xl lg:text-7xl">
-            O <span className="text-primary">Thug Life RJ</span> escreve a história do RP carioca há mais de{" "}
-            <span className="text-primary">10 anos</span>.
+            A <span className="text-primary">Thug Life RJ</span> escreve a História na temática{" "}
+            <span className="text-primary">Baque RJ</span> há mais de <span className="text-primary">10 anos</span>.
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted-foreground">
             Uma cidade viva do morro à orla: facções, corporações, negócios legais e ilegais, e uma comunidade
