@@ -678,18 +678,33 @@ export function RichTextEditor({
         />
         <Divider />
         <ColorMenu title="Cor da letra" label="A●" onPick={(c) => exec("foreColor", c)} />
-        <ColorMenu title="Cor de fundo do texto" label="▨" onPick={(c) => exec("hiliteColor", c)} />
+        <FillStrokeMenu
+          title="Cor de fundo do texto (preenchimento e traçado)"
+          label="▨"
+          defaultFill="#3a1116"
+          defaultStroke="#ef4444"
+          onApply={textHighlight}
+        />
         <Divider />
+        <TBSelect
+          title="Alinhar e Recuar"
+          value=""
+          width="10rem"
+          options={[{ label: "Alinhar e Recuar", value: "" }, ...ALIGNMENTS]}
+          onChange={(v) => v && exec(v)}
+        />
         <TB title="Alinhar à esquerda" active={state.left} onClick={() => exec("justifyLeft")}>⇤</TB>
-        <TB title="Centralizar" active={state.center} onClick={() => exec("justifyCenter")}>≡</TB>
+        <TB title="Alinhar no centro" active={state.center} onClick={() => exec("justifyCenter")}>≡</TB>
         <TB title="Alinhar à direita" active={state.right} onClick={() => exec("justifyRight")}>⇥</TB>
         <TB title="Justificar" active={state.justify} onClick={() => exec("justifyFull")}>☰</TB>
         <Divider />
         <TB title="Lista com marcadores" active={state.ul} onClick={() => exec("insertUnorderedList")}>•—</TB>
+        <BulletMenu onPick={applyBullet} />
         <TB title="Lista numerada" active={state.ol} onClick={() => exec("insertOrderedList")}>1—</TB>
         <TB title="Lista de verificação" onClick={checklist}>☑—</TB>
         <TB title="Diminuir recuo" onClick={() => exec("outdent")}>⇠</TB>
         <TB title="Aumentar recuo" onClick={() => exec("indent")}>⇢</TB>
+
         <TB title="Citação" onClick={() => exec("formatBlock", "<blockquote>")}>❝</TB>
         <Divider />
         <TBSelect
