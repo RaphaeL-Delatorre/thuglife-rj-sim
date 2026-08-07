@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,8 +10,10 @@ import { Textarea } from "@/components/ui/textarea";
 export type FieldDef = {
   key: string;
   label: string;
-  type: "text" | "textarea" | "number" | "list" | "switch";
+  type: "text" | "textarea" | "number" | "list" | "switch" | "richtext" | "select";
   placeholder?: string;
+  options?: { label: string; value: string }[];
+  hint?: string;
 };
 
 export type RecordValues = Record<string, unknown>;
@@ -70,6 +73,26 @@ export function RecordForm({
           {f.type === "switch" && (
             <Switch id={f.key} checked={Boolean(values[f.key])} onCheckedChange={(v) => set(f.key, v)} />
           )}
+          {f.type === "select" && (
+            <select
+              id={f.key}
+              value={String(values[f.key] ?? "")}
+              onChange={(e) => set(f.key, e.target.value || null)}
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary"
+            >
+              {(f.options ?? []).map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          )}
+          {f.type === "richtext" && (
+            <RichTextEditor
+              value={String(values[f.key] ?? "")}
+              onChange={(html) => set(f.key, html)}
+            />
+          )}
           {f.type === "text" && (
             <Input
               id={f.key}
@@ -78,6 +101,7 @@ export function RecordForm({
               onChange={(e) => set(f.key, e.target.value)}
             />
           )}
+          {f.hint && <p className="text-[11px] text-muted-foreground">{f.hint}</p>}
         </div>
       ))}
     </div>

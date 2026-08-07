@@ -28,9 +28,9 @@ export const getSiteContent = createServerFn({ method: "GET" }).handler(async ()
     db.from("requirements").select("id, num, title, description, sort_order").order("sort_order"),
     db.from("news").select("id, tag, title, body, sort_order").order("sort_order"),
     db.from("faqs").select("id, question, answer, sort_order").order("sort_order"),
-    db.from("rule_categories").select("id, name, sort_order").order("sort_order"),
-    db.from("rule_sections").select("id, block, title, sort_order").order("sort_order"),
-    db.from("rules").select("id, section_id, code, text, sort_order").order("sort_order"),
+    db.from("rule_categories").select("id, name, slug, icon, subtitle, description, content_html, published, sort_order").eq("published", true).order("sort_order"),
+    db.from("rule_sections").select("id, block, title, icon, body_html, category_id, sort_order").order("sort_order"),
+    db.from("rules").select("id, section_id, code, text, html, sort_order").order("sort_order"),
     db.from("actions").select("id, porte, nome, bandidos, policia, regras, sort_order").order("sort_order"),
   ]);
 
@@ -48,3 +48,40 @@ export const getSiteContent = createServerFn({ method: "GET" }).handler(async ()
 });
 
 export type SiteContent = Awaited<ReturnType<typeof getSiteContent>>;
+
+export const getRuleCategory = createServerFn({ method: "GET" })
+  .inputValidator((data: { slug: string }) => data)
+  .handler(async ({ data }) => {
+    const db = publicClient();
+    const { data: category } = await db
+      .from("rule_categories")
+      .select("id, name, slug, icon, subtitle, description, content_html, published, sort_order")
+      .eq("slug", data.slug)
+      .eq("published", true)
+      .maybeSingle();
+
+    if (!category) return { category: null, sections: [], rules: [], settings: {} as SiteSettings };
+
+    const [settings, sections] = await Promise.all([
+      db.from("site_settings").select("key, value").eq("key", "geral").maybeSingle(),
+      db
+        .from("rule_sections")
+        .select("id, block, title, icon, body_html, category_id, sort_order")
+        .eq("category_id", category.id)
+        .order("sort_order"),
+    ]);
+
+    const ids = (sections.data ?? []).map((s) => s.id);
+    const rules = ids.length
+      ? await db.from("rules").select("id, section_id, code, text, html, sort_order").in("section_id", ids).order("sort_order")
+      : { data: [] };
+
+    return {
+      category,
+      sections: sections.data ?? [],
+      rules: rules.data ?? [],
+      settings: (settings.data?.value ?? {}) as SiteSettings,
+    };
+  });
+
+export type RuleCategoryPage = Awaited<ReturnType<typeof getRuleCategory>>;

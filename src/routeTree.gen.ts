@@ -12,8 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as RegrasRouteImport } from './routes/regras'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as RegrasIndexRouteImport } from './routes/regras.index'
+import { Route as RegrasSlugRouteImport } from './routes/regras.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,56 +30,66 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RegrasRoute = RegrasRouteImport.update({
-  id: '/regras',
-  path: '/regras',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const RegrasIndexRoute = RegrasIndexRouteImport.update({
+  id: '/regras/',
+  path: '/regras/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegrasSlugRoute = RegrasSlugRouteImport.update({
+  id: '/regras/$slug',
+  path: '/regras/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/regras': typeof RegrasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/regras/$slug': typeof RegrasSlugRoute
+  '/regras/': typeof RegrasIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/regras': typeof RegrasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/regras/$slug': typeof RegrasSlugRoute
+  '/regras': typeof RegrasIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/regras': typeof RegrasRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/regras/$slug': typeof RegrasSlugRoute
+  '/regras/': typeof RegrasIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/regras' | '/dashboard'
+  fullPaths: '/' | '/auth' | '/dashboard' | '/regras/$slug' | '/regras/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/regras' | '/dashboard'
+  to: '/' | '/auth' | '/dashboard' | '/regras/$slug' | '/regras'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/regras'
     | '/_authenticated/dashboard'
+    | '/regras/$slug'
+    | '/regras/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  RegrasRoute: typeof RegrasRoute
+  RegrasSlugRoute: typeof RegrasSlugRoute
+  RegrasIndexRoute: typeof RegrasIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -104,19 +115,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/regras': {
-      id: '/regras'
-      path: '/regras'
-      fullPath: '/regras'
-      preLoaderRoute: typeof RegrasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/regras/': {
+      id: '/regras/'
+      path: '/regras'
+      fullPath: '/regras/'
+      preLoaderRoute: typeof RegrasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/regras/$slug': {
+      id: '/regras/$slug'
+      path: '/regras/$slug'
+      fullPath: '/regras/$slug'
+      preLoaderRoute: typeof RegrasSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -136,7 +154,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  RegrasRoute: RegrasRoute,
+  RegrasSlugRoute: RegrasSlugRoute,
+  RegrasIndexRoute: RegrasIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

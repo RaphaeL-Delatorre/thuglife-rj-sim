@@ -180,46 +180,82 @@ export type Database = {
       }
       rule_categories: {
         Row: {
+          content_html: string
+          description: string
+          icon: string
           id: string
           name: string
+          published: boolean
+          slug: string
           sort_order: number
+          subtitle: string
         }
         Insert: {
+          content_html?: string
+          description?: string
+          icon?: string
           id?: string
           name: string
+          published?: boolean
+          slug?: string
           sort_order?: number
+          subtitle?: string
         }
         Update: {
+          content_html?: string
+          description?: string
+          icon?: string
           id?: string
           name?: string
+          published?: boolean
+          slug?: string
           sort_order?: number
+          subtitle?: string
         }
         Relationships: []
       }
       rule_sections: {
         Row: {
           block: string
+          body_html: string
+          category_id: string | null
+          icon: string
           id: string
           sort_order: number
           title: string
         }
         Insert: {
           block?: string
+          body_html?: string
+          category_id?: string | null
+          icon?: string
           id?: string
           sort_order?: number
           title: string
         }
         Update: {
           block?: string
+          body_html?: string
+          category_id?: string | null
+          icon?: string
           id?: string
           sort_order?: number
           title?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "rule_sections_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "rule_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rules: {
         Row: {
           code: string
+          html: string
           id: string
           section_id: string
           sort_order: number
@@ -227,6 +263,7 @@ export type Database = {
         }
         Insert: {
           code?: string
+          html?: string
           id?: string
           section_id: string
           sort_order?: number
@@ -234,6 +271,7 @@ export type Database = {
         }
         Update: {
           code?: string
+          html?: string
           id?: string
           section_id?: string
           sort_order?: number
