@@ -5,12 +5,15 @@ import news1Asset from "@/assets/tl-2.png.asset.json";
 import news2Asset from "@/assets/tl-3.png.asset.json";
 import news3Asset from "@/assets/tl-4.png.asset.json";
 import logoAsset from "@/assets/logo-tl.png.asset.json";
+import { getSiteContent } from "@/lib/site.functions";
 
 const logoImg = logoAsset.url;
 const bgSlides = [heroAsset.url, news1Asset.url, news2Asset.url, news3Asset.url];
 
 export const Route = createFileRoute("/")({
+  loader: () => getSiteContent(),
   component: Index,
+
   head: () => ({
     meta: [
       { title: "Thug Life RJ — GTA RP do Rio há mais de 10 anos" },
