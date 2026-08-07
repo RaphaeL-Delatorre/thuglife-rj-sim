@@ -362,6 +362,23 @@ function Index() {
             className="h-18 w-18 rounded-lg object-cover ring-1 ring-primary/40"
           />
           <p className="font-display text-lg uppercase tracking-wide">Thug Life RJ</p>
+          <ul className="flex items-center gap-5">
+            {socials.map((s) => (
+              <li key={s.name}>
+                <a
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.name}
+                  className="block text-muted-foreground transition-colors hover:text-primary"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="h-7 w-7" aria-hidden>
+                    <path d={s.path} />
+                  </svg>
+                </a>
+              </li>
+            ))}
+          </ul>
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} Thug Life RJ. Servidor de roleplay não afiliado à Rockstar Games ou Take-Two.
           </p>
