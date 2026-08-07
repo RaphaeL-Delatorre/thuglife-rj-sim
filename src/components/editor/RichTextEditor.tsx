@@ -44,6 +44,23 @@ const EMOJIS = [
   "⏳","📅","📖","📝","📢","💬","🗣️","🤝","🙏","👊","👍","👎","🧠","💀","☠️","🩸","🎭","🎮","🎧","🎬",
 ];
 
+const BULLETS = [
+  "•","·","⊛","◉","○","◌","◍","◎","●","◘","◦","☉","⁃","⁌","⁍","◆","◇","◈","★","☆",
+  "■","□","☐","☑","☒","✓","✔","❥","❧","☙","☸","✤","✱","✲","↠","↣","↦","↬","⇛","⇝",
+  "⇢","⇨","➙","➛","➜","➝","➞","➟","➠","➡","➢","➣","➤","➥","➦","➧","➨","➮","➱","➲",
+  "➳","➵","➸","➼","➽","➾","→","⇾","⇒","‣","▶","▷","▸","▹","►","▻",
+];
+
+const ALIGNMENTS = [
+  { label: "Alinhar à esquerda", value: "justifyLeft" },
+  { label: "Alinhar no centro", value: "justifyCenter" },
+  { label: "Alinhar à direita", value: "justifyRight" },
+  { label: "Justificar", value: "justifyFull" },
+  { label: "Aumentar recuo", value: "indent" },
+  { label: "Diminuir recuo", value: "outdent" },
+];
+
+
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
 type SelectionState = {
@@ -184,6 +201,148 @@ function ColorMenu({
     </span>
   );
 }
+
+/** Menu com duas cores: preenchimento e traçado (borda). */
+function FillStrokeMenu({
+  label,
+  title,
+  defaultFill,
+  defaultStroke,
+  onApply,
+}: {
+  label: React.ReactNode;
+  title: string;
+  defaultFill: string;
+  defaultStroke: string;
+  onApply: (fill: string, stroke: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [fill, setFill] = useState(defaultFill);
+  const [stroke, setStroke] = useState(defaultStroke);
+
+  const row = (current: string, set: (v: string) => void) => (
+    <div className="mt-1 grid grid-cols-10 gap-1">
+      {COLORS.map((c) => (
+        <button
+          key={c}
+          type="button"
+          title={c}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => set(c)}
+          className={`h-5 w-5 rounded border ${current === c ? "border-primary ring-1 ring-primary" : "border-border"}`}
+          style={{ background: c }}
+        />
+      ))}
+    </div>
+  );
+
+  return (
+    <span className="relative">
+      <TB title={title} onClick={() => setOpen((o) => !o)}>
+        {label}
+      </TB>
+      {open && (
+        <div className="absolute left-0 top-9 z-50 w-[16rem] rounded-lg border border-border bg-popover p-3 shadow-xl">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            Cor do preenchimento
+          </p>
+          {row(fill, setFill)}
+          <div className="mt-2 flex items-center gap-2">
+            <input
+              type="color"
+              aria-label="Preenchimento personalizado"
+              value={fill}
+              onChange={(e) => setFill(e.target.value)}
+              className="h-7 w-16 cursor-pointer rounded border border-border bg-background"
+            />
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => setFill("transparent")}
+              className="rounded border border-border px-2 py-1 text-[11px] hover:bg-secondary"
+            >
+              Sem preenchimento
+            </button>
+          </div>
+
+          <p className="mt-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            Cor do traçado (borda)
+          </p>
+          {row(stroke, setStroke)}
+          <div className="mt-2 flex items-center gap-2">
+            <input
+              type="color"
+              aria-label="Traçado personalizado"
+              value={stroke}
+              onChange={(e) => setStroke(e.target.value)}
+              className="h-7 w-16 cursor-pointer rounded border border-border bg-background"
+            />
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => setStroke("transparent")}
+              className="rounded border border-border px-2 py-1 text-[11px] hover:bg-secondary"
+            >
+              Sem traçado
+            </button>
+          </div>
+
+          <div
+            className="mt-3 rounded-xl border px-3 py-2 text-xs"
+            style={{ background: fill, borderColor: stroke }}
+          >
+            Pré-visualização da moldura
+          </div>
+
+          <Button
+            type="button"
+            size="sm"
+            className="mt-3 w-full"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => {
+              onApply(fill, stroke);
+              setOpen(false);
+            }}
+          >
+            Aplicar
+          </Button>
+        </div>
+      )}
+    </span>
+  );
+}
+
+function BulletMenu({ onPick }: { onPick: (char: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="relative">
+      <TB title="Marcador da lista" onClick={() => setOpen((o) => !o)}>
+        ◉—
+      </TB>
+      {open && (
+        <div className="absolute left-0 top-9 z-50 grid max-h-[15rem] w-[17rem] grid-cols-10 gap-1 overflow-y-auto rounded-lg border border-border bg-popover p-2 shadow-xl">
+          {BULLETS.map((b, i) => (
+            <button
+              key={`${b}-${i}`}
+              type="button"
+              title={`Marcador ${b}`}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                onPick(b);
+                setOpen(false);
+              }}
+              className="rounded p-1 text-sm hover:bg-secondary"
+            >
+              {b}
+            </button>
+          ))}
+        </div>
+      )}
+    </span>
+  );
+}
+
+
 
 /* ── Editor ──────────────────────────────────────────────────────────── */
 
@@ -381,12 +540,44 @@ export function RichTextEditor({
     },
   };
 
-  const frame = (color: string) =>
+  const frame = (fill: string, stroke: string) =>
     wrapSelection(
-      `<div class="rc-frame" style="border-color:${color};box-shadow:inset 0 0 0 1px ${color}33"><div>`,
+      `<div class="rc-frame" style="border:1px solid ${stroke};border-radius:0.9rem;background:${fill}"><div>`,
       `</div></div><p><br></p>`,
       "Conteúdo em moldura.",
     );
+
+  const textHighlight = (fill: string, stroke: string) =>
+    wrapSelection(
+      `<span class="rc-hl" style="background:${fill};border:1px solid ${stroke}">`,
+      `</span>`,
+      "texto destacado",
+    );
+
+  /** Aplica o caractere de marcador na lista onde está o cursor. */
+  const applyBullet = (char: string) => {
+    focusEditor();
+    const sel = window.getSelection();
+    let node: Node | null = sel && sel.rangeCount > 0 ? sel.getRangeAt(0).startContainer : null;
+    let list: HTMLUListElement | null = null;
+    while (node && node !== ref.current) {
+      if (node.nodeType === 1 && (node as HTMLElement).tagName === "UL") {
+        list = node as HTMLUListElement;
+        break;
+      }
+      node = node.parentNode;
+    }
+    if (!list) {
+      insertHTML(
+        `<ul class="rc-bullets" style="--rc-bullet:'${char}'"><li>Primeiro item</li><li>Segundo item</li></ul><p><br></p>`,
+      );
+      return;
+    }
+    list.classList.add("rc-bullets");
+    list.style.setProperty("--rc-bullet", `'${char}'`);
+    emit();
+  };
+
 
   const calloutFrame = (color: string) => {
     const title = window.prompt("Título do aviso", "AVISO CRÍTICO") ?? "AVISO";
@@ -487,18 +678,33 @@ export function RichTextEditor({
         />
         <Divider />
         <ColorMenu title="Cor da letra" label="A●" onPick={(c) => exec("foreColor", c)} />
-        <ColorMenu title="Cor de fundo do texto" label="▨" onPick={(c) => exec("hiliteColor", c)} />
+        <FillStrokeMenu
+          title="Cor de fundo do texto (preenchimento e traçado)"
+          label="▨"
+          defaultFill="#3a1116"
+          defaultStroke="#ef4444"
+          onApply={textHighlight}
+        />
         <Divider />
+        <TBSelect
+          title="Alinhar e Recuar"
+          value=""
+          width="10rem"
+          options={[{ label: "Alinhar e Recuar", value: "" }, ...ALIGNMENTS]}
+          onChange={(v) => v && exec(v)}
+        />
         <TB title="Alinhar à esquerda" active={state.left} onClick={() => exec("justifyLeft")}>⇤</TB>
-        <TB title="Centralizar" active={state.center} onClick={() => exec("justifyCenter")}>≡</TB>
+        <TB title="Alinhar no centro" active={state.center} onClick={() => exec("justifyCenter")}>≡</TB>
         <TB title="Alinhar à direita" active={state.right} onClick={() => exec("justifyRight")}>⇥</TB>
         <TB title="Justificar" active={state.justify} onClick={() => exec("justifyFull")}>☰</TB>
         <Divider />
         <TB title="Lista com marcadores" active={state.ul} onClick={() => exec("insertUnorderedList")}>•—</TB>
+        <BulletMenu onPick={applyBullet} />
         <TB title="Lista numerada" active={state.ol} onClick={() => exec("insertOrderedList")}>1—</TB>
         <TB title="Lista de verificação" onClick={checklist}>☑—</TB>
         <TB title="Diminuir recuo" onClick={() => exec("outdent")}>⇠</TB>
         <TB title="Aumentar recuo" onClick={() => exec("indent")}>⇢</TB>
+
         <TB title="Citação" onClick={() => exec("formatBlock", "<blockquote>")}>❝</TB>
         <Divider />
         <TBSelect
@@ -528,7 +734,14 @@ export function RichTextEditor({
         <TB title="Inserir vídeo" onClick={promptInsert.video}>🎬</TB>
         <TB title="Inserir tabela" onClick={promptInsert.table}>▦</TB>
         <Divider />
-        <ColorMenu title="Moldura (escolha a cor)" label="▭" onPick={frame} />
+        <FillStrokeMenu
+          title="Moldura (preenchimento e traçado)"
+          label="▭"
+          defaultFill="#150a0c"
+          defaultStroke="#ef4444"
+          onApply={frame}
+        />
+
         <ColorMenu title="Caixa de aviso com moldura" label="⚠▣" onPick={calloutFrame} />
         <ColorMenu title="Texto com brilho" label="A✨" onPick={glow} />
         <ColorMenu title="Texto com moldura (destaque)" label="A▢" onPick={badge} />

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import logoAsset from "@/assets/logo-tl.png.asset.json";
 import { getSiteContent } from "@/lib/site.functions";
+import type { SiteContent } from "@/lib/site.functions";
 
 const logoImg = logoAsset.url;
 
@@ -144,18 +145,8 @@ const acoesFallback = [
   { porte: "Grande Porte", nome: "Carro Forte", bandidos: 5, policia: 8, regras: ["Fuzil liberado", "Sem reféns", "Perseguição encerra a ação"] },
 ];
 
-const categoriasFallback = [
-  "Termos de Compras",
-  "Regras Gerais",
-  "Código Penal",
-  "Áreas Safes",
-  "Regras Policiais",
-  "Regras do Ilegal",
-  "Regras do Hospital",
-  "Regras de Denúncias",
-  "Regras de Telagem",
-  "Regras de Ações",
-];
+
+
 
 function normalize(v: string) {
   return v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -193,7 +184,7 @@ function Bloco({ secao, busca }: { secao: Secao; busca: string }) {
 
 function RegrasPage() {
   const [busca, setBusca] = useState("");
-  const content = Route.useLoaderData();
+  const content: SiteContent = Route.useLoaderData();
   const cfg = content.settings;
 
   const build = (block: string): Secao[] =>
@@ -211,9 +202,12 @@ function RegrasPage() {
   const dbGerais = build("gerais");
   const termos = dbTermos.length ? dbTermos : termosFallback;
   const gerais = dbGerais.length ? dbGerais : geraisFallback;
-  const categorias = content.categories.length
-    ? content.categories.map((c) => c.name)
-    : categoriasFallback;
+  const categorias = content.categories.map((c) => ({
+    name: c.name,
+    slug: c.slug,
+    icon: c.icon ?? "",
+  }));
+
   const acoes = content.actions.length
     ? content.actions.map((a) => ({
         porte: a.porte ?? "",
@@ -299,14 +293,18 @@ function RegrasPage() {
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           {categorias.map((c) => (
-            <span
-              key={c}
-              className="rounded-md border border-border bg-card/80 px-4 py-2 text-sm font-semibold uppercase tracking-wide backdrop-blur transition-colors hover:border-primary/70"
+            <Link
+              key={c.slug}
+              to="/regras/$slug"
+              params={{ slug: c.slug }}
+              className="inline-flex items-center gap-2 rounded-md border border-border bg-card/80 px-4 py-2 text-sm font-semibold uppercase tracking-wide backdrop-blur transition-colors hover:border-primary/70 hover:bg-primary/10 hover:text-primary"
             >
-              {c}
-            </span>
+              {c.icon && <span aria-hidden>{c.icon}</span>}
+              {c.name}
+            </Link>
           ))}
         </div>
+
 
         <h2 className="mt-14 font-display text-3xl uppercase">Ações Disponíveis</h2>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
