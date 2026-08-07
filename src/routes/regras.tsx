@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import logoAsset from "@/assets/logo-tl.png.asset.json";
+import { getSiteContent } from "@/lib/site.functions";
 
 const logoImg = logoAsset.url;
 
 export const Route = createFileRoute("/regras")({
+  loader: () => getSiteContent(),
   component: RegrasPage,
   head: () => ({
     meta: [
@@ -27,7 +29,7 @@ export const Route = createFileRoute("/regras")({
 
 type Secao = { id: string; titulo: string; itens: { n: string; texto: string }[] };
 
-const termos: Secao[] = [
+const termosFallback: Secao[] = [
   {
     id: "acesso",
     titulo: "1. Acesso à Cidade",
@@ -87,7 +89,7 @@ const termos: Secao[] = [
   },
 ];
 
-const gerais: Secao[] = [
+const geraisFallback: Secao[] = [
   {
     id: "conduta",
     titulo: "Conduta e Roleplay",
@@ -133,7 +135,7 @@ const gerais: Secao[] = [
   },
 ];
 
-const acoes = [
+const acoesFallback = [
   { porte: "Pequeno Porte", nome: "Lojinhas", bandidos: 3, policia: 4, regras: ["Apenas pistola", "Negociação obrigatória", "Sem reféns", "1 bandido pode ficar do lado de fora"] },
   { porte: "Pequeno Porte", nome: "Ammunation", bandidos: 2, policia: 3, regras: ["Apenas pistola", "Negociação obrigatória", "Sem reféns", "Proibido bandido fora do estabelecimento"] },
   { porte: "Médio Porte", nome: "Central de Dados", bandidos: 4, policia: 6, regras: ["Fuzil liberado", "Negociação obrigatória", "1 refém permitido"] },
@@ -142,7 +144,7 @@ const acoes = [
   { porte: "Grande Porte", nome: "Carro Forte", bandidos: 5, policia: 8, regras: ["Fuzil liberado", "Sem reféns", "Perseguição encerra a ação"] },
 ];
 
-const categorias = [
+const categoriasFallback = [
   "Termos de Compras",
   "Regras Gerais",
   "Código Penal",
@@ -191,11 +193,42 @@ function Bloco({ secao, busca }: { secao: Secao; busca: string }) {
 
 function RegrasPage() {
   const [busca, setBusca] = useState("");
+  const content = Route.useLoaderData();
+  const cfg = content.settings;
+
+  const build = (block: string): Secao[] =>
+    content.sections
+      .filter((s) => s.block === block)
+      .map((s) => ({
+        id: s.id,
+        titulo: s.title,
+        itens: content.rules
+          .filter((r) => r.section_id === s.id)
+          .map((r) => ({ n: r.code, texto: r.text })),
+      }));
+
+  const dbTermos = build("termos");
+  const dbGerais = build("gerais");
+  const termos = dbTermos.length ? dbTermos : termosFallback;
+  const gerais = dbGerais.length ? dbGerais : geraisFallback;
+  const categorias = content.categories.length
+    ? content.categories.map((c) => c.name)
+    : categoriasFallback;
+  const acoes = content.actions.length
+    ? content.actions.map((a) => ({
+        porte: a.porte ?? "",
+        nome: a.nome,
+        bandidos: a.bandidos ?? 0,
+        policia: a.policia ?? 0,
+        regras: (a.regras ?? []) as string[],
+      }))
+    : acoesFallback;
+
   const acoesFiltradas = useMemo(() => {
     const q = normalize(busca);
     if (!q) return acoes;
     return acoes.filter((a) => normalize(a.nome + a.porte + a.regras.join(" ")).includes(q));
-  }, [busca]);
+  }, [busca, acoes]);
 
   return (
     <div className="relative min-h-screen font-body text-foreground">
@@ -203,14 +236,14 @@ function RegrasPage() {
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <Link to="/" className="flex items-center gap-3">
             <img src={logoImg} alt="Logo Thug Life RJ" width={44} height={44} className="h-11 w-11 rounded-md object-cover ring-1 ring-primary/50" />
-            <span className="font-display text-lg tracking-wide">THUG LIFE RJ</span>
+            <span className="font-display text-lg tracking-wide">{cfg["siteName"] || "THUG LIFE RJ"}</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link to="/" className="text-sm font-semibold uppercase tracking-widest text-muted-foreground transition-colors hover:text-primary">
               Início
             </Link>
             <a
-              href="fivem://connect/fivem.equipetl.com"
+              href={cfg["connectUrl"] || "fivem://connect/fivem.equipetl.com"}
               className="rounded-md bg-primary px-4 py-2 text-sm font-bold uppercase tracking-wider text-primary-foreground transition-transform hover:scale-105"
             >
               Conectar
@@ -220,9 +253,9 @@ function RegrasPage() {
       </header>
 
       <main className="mx-auto max-w-4xl px-5 pt-28 pb-24">
-        <h1 className="font-display text-4xl uppercase sm:text-5xl">Regras e Termos</h1>
+        <h1 className="font-display text-4xl uppercase sm:text-5xl">{cfg["rulesTitle"] || "Regras e Termos"}</h1>
         <p className="mt-3 text-muted-foreground">
-          Documento oficial da Thug Life RJ. Leia com atenção antes de conectar na cidade.
+          {cfg["rulesIntro"] || "Documento oficial da Thug Life RJ. Leia com atenção antes de conectar na cidade."}
         </p>
 
         <div className="mt-8 rounded-xl border border-border bg-card/80 p-5 backdrop-blur-md">
@@ -241,9 +274,8 @@ function RegrasPage() {
         <div className="mt-8 rounded-xl border border-primary/50 bg-card/85 p-6 shadow-[var(--shadow-glow)] backdrop-blur">
           <h2 className="font-display text-xl uppercase text-primary">Importante</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Ao entrar na Thug Life RJ você declara estar de acordo com os termos deste documento. O acesso
-            ao servidor implica aceitação automática das normas descritas aqui, criadas para garantir uma
-            convivência justa, segura e coerente com a proposta de roleplay.
+            {cfg["rulesImportant"] ||
+              "Ao entrar na Thug Life RJ você declara estar de acordo com os termos deste documento. O acesso ao servidor implica aceitação automática das normas descritas aqui, criadas para garantir uma convivência justa, segura e coerente com a proposta de roleplay."}
           </p>
         </div>
 

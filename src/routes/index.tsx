@@ -5,12 +5,15 @@ import news1Asset from "@/assets/tl-2.png.asset.json";
 import news2Asset from "@/assets/tl-3.png.asset.json";
 import news3Asset from "@/assets/tl-4.png.asset.json";
 import logoAsset from "@/assets/logo-tl.png.asset.json";
+import { getSiteContent } from "@/lib/site.functions";
 
 const logoImg = logoAsset.url;
 const bgSlides = [heroAsset.url, news1Asset.url, news2Asset.url, news3Asset.url];
 
 export const Route = createFileRoute("/")({
+  loader: () => getSiteContent(),
   component: Index,
+
   head: () => ({
     meta: [
       { title: "Thug Life RJ — GTA RP do Rio há mais de 10 anos" },
@@ -42,14 +45,14 @@ export const Route = createFileRoute("/")({
   }),
 });
 
-const stats = [
+const statsFallback = [
   { value: "10+", label: "Anos", sub: "no ar" },
   { value: "+100K", label: "Jogadores", sub: "registrados" },
   { value: "+60K", label: "Membros", sub: "no Discord" },
   { value: "+500", label: "Players", sub: "simultâneos" },
 ];
 
-const news = [
+const newsFallback = [
   {
     tag: "Servidor",
     title: "Novo sistema de rachas noturnos na Zona Sul",
@@ -67,7 +70,7 @@ const news = [
   },
 ];
 
-const requisitos = [
+const requisitosFallback = [
   { n: "01", t: "Ter 16 anos ou mais", d: "Contas verificadas no Discord com idade mínima declarada." },
   { n: "02", t: "GTA V Original + FiveM", d: "Cópia legítima na Steam, Epic ou Rockstar Launcher + FiveM instalado." },
   { n: "03", t: "Microfone funcionando", d: "Todo o roleplay acontece por voz. Áudio limpo é obrigatório." },
@@ -100,7 +103,7 @@ const socials = [
   },
 ];
 
-const faq = [
+const faqFallback = [
   {
     q: "Como entro no servidor?",
     a: "Entre no nosso Discord, abra o canal de whitelist, faça a prova de regras e aguarde a liberação do personagem. O processo costuma levar poucas horas.",
@@ -121,6 +124,23 @@ const faq = [
 
 function Index() {
   const [open, setOpen] = useState<number | null>(0);
+  const content = Route.useLoaderData();
+  const cfg = content.settings;
+
+  const stats = content.stats.length
+    ? content.stats.map((s) => ({ value: s.value, label: s.label, sub: s.sub ?? "" }))
+    : statsFallback;
+  const news = content.news.length
+    ? content.news.map((n) => ({ tag: n.tag ?? "", title: n.title, text: n.body ?? "" }))
+    : newsFallback;
+  const requisitos = content.requirements.length
+    ? content.requirements.map((r) => ({ n: r.num, t: r.title, d: r.description ?? "" }))
+    : requisitosFallback;
+  const faq = content.faqs.length
+    ? content.faqs.map((f) => ({ q: f.question, a: f.answer ?? "" }))
+    : faqFallback;
+  const discordUrl = cfg["discordUrl"] || DISCORD_URL;
+  const connectUrl = cfg["connectUrl"] || CONNECT_URL;
 
   return (
     <div className="relative min-h-screen font-body text-foreground">
@@ -157,7 +177,7 @@ function Index() {
               height={44}
               className="h-11 w-11 rounded-md object-cover ring-1 ring-primary/50"
             />
-            <span className="font-display text-lg tracking-wide">THUG LIFE RJ</span>
+            <span className="font-display text-lg tracking-wide">{cfg["siteName"] || "THUG LIFE RJ"}</span>
           </a>
           <ul className="hidden items-center gap-8 text-sm font-semibold uppercase tracking-widest md:flex">
             <li><a href="#home" className="text-muted-foreground transition-colors hover:text-primary">Início</a></li>
@@ -180,15 +200,15 @@ function Index() {
         <div className="relative mx-auto w-full max-w-6xl px-5 pt-28 pb-20">
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/60 bg-background/50 px-4 py-1 text-xs font-bold uppercase tracking-[0.25em] text-primary backdrop-blur">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-            Mais de 10 anos no Ar · TL Reina
+            {cfg["heroBadge"] || "Mais de 10 anos no Ar · TL Reina"}
           </span>
           <h1 className="mt-7 max-w-4xl font-display text-[2.6rem] uppercase leading-[0.92] tracking-tight sm:text-6xl lg:text-[5rem]">
-            <span className="block text-muted-foreground/80 text-[0.42em] tracking-[0.4em]">A cidade que não dorme</span>
+            <span className="block text-muted-foreground/80 text-[0.42em] tracking-[0.4em]">{cfg["heroKicker"] || "A cidade que não dorme"}</span>
             <span
               className="mt-3 block bg-clip-text text-transparent drop-shadow-[0_8px_30px_oklch(0.58_0.245_27/0.45)]"
               style={{ backgroundImage: "linear-gradient(180deg, oklch(1 0 0) 35%, oklch(0.78 0.02 20) 100%)" }}
             >
-              A Thug Life RJ
+              {cfg["heroTitle"] || "A Thug Life RJ"}
             </span>
             <span className="mt-1 block text-[0.52em] font-normal tracking-wide text-foreground/90">
               escreve a História na temática{" "}
@@ -203,8 +223,8 @@ function Index() {
           </h1>
           <div className="mt-6 h-px w-40 bg-gradient-to-r from-primary to-transparent" />
           <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-            Uma cidade viva do morro à orla: facções, corporações, negócios legais e ilegais, e uma comunidade
-            que não para de crescer.
+            {cfg["heroDescription"] ||
+              "Uma cidade viva do morro à orla: facções, corporações, negócios legais e ilegais, e uma comunidade que não para de crescer."}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a
@@ -238,9 +258,10 @@ function Index() {
       </section>
 
       <section id="noticias" className="mx-auto max-w-6xl px-5 py-24">
-        <h2 className="font-display text-4xl uppercase sm:text-5xl">Notícias da cidade</h2>
+        <h2 className="font-display text-4xl uppercase sm:text-5xl">{cfg["newsTitle"] || "Notícias da cidade"}</h2>
         <p className="mt-3 max-w-2xl text-muted-foreground">
-          Atualizações, eventos e bastidores do maior servidor com temática do Rio de Janeiro.
+          {cfg["newsSubtitle"] ||
+            "Atualizações, eventos e bastidores do maior servidor com temática do Rio de Janeiro."}
         </p>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {news.map((n) => (
@@ -261,9 +282,9 @@ function Index() {
 
       <section id="jogar" className="border-y border-border bg-surface-elevated py-24 backdrop-blur-md">
         <div className="mx-auto max-w-6xl px-5">
-          <h2 className="font-display text-4xl uppercase sm:text-5xl">Jogue com a gente</h2>
+          <h2 className="font-display text-4xl uppercase sm:text-5xl">{cfg["playTitle"] || "Jogue com a gente"}</h2>
           <p className="mt-3 max-w-2xl text-muted-foreground">
-            Requisitos para liberar seu personagem e entrar na cidade.
+            {cfg["playSubtitle"] || "Requisitos para liberar seu personagem e entrar na cidade."}
           </p>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {requisitos.map((r) => (
@@ -300,7 +321,7 @@ function Index() {
 
           <div className="mt-10 flex justify-center">
             <a
-              href={CONNECT_URL}
+              href={connectUrl}
               className="inline-flex items-center gap-3 rounded-lg bg-primary px-8 py-4 font-display text-xl uppercase tracking-wider text-primary-foreground shadow-[var(--shadow-glow)] transition-transform hover:scale-105"
             >
               <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6" aria-hidden>
@@ -318,7 +339,7 @@ function Index() {
               </p>
             </div>
             <a
-              href={DISCORD_URL}
+              href={discordUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-md px-6 py-3 font-display text-lg uppercase text-primary-foreground"
@@ -331,7 +352,7 @@ function Index() {
       </section>
 
       <section id="duvidas" className="mx-auto max-w-3xl px-5 py-24">
-        <h2 className="font-display text-4xl uppercase sm:text-5xl">Dúvidas frequentes</h2>
+        <h2 className="font-display text-4xl uppercase sm:text-5xl">{cfg["faqTitle"] || "Dúvidas frequentes"}</h2>
         <div className="mt-8 space-y-3">
           {faq.map((f, i) => (
             <div
