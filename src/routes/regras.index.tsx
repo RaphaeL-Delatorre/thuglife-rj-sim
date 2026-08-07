@@ -145,18 +145,8 @@ const acoesFallback = [
   { porte: "Grande Porte", nome: "Carro Forte", bandidos: 5, policia: 8, regras: ["Fuzil liberado", "Sem reféns", "Perseguição encerra a ação"] },
 ];
 
-const categoriasFallback = [
-  "Termos de Compras",
-  "Regras Gerais",
-  "Código Penal",
-  "Áreas Safes",
-  "Regras Policiais",
-  "Regras do Ilegal",
-  "Regras do Hospital",
-  "Regras de Denúncias",
-  "Regras de Telagem",
-  "Regras de Ações",
-];
+
+
 
 function normalize(v: string) {
   return v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
