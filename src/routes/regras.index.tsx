@@ -303,14 +303,18 @@ function RegrasPage() {
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           {categorias.map((c) => (
-            <span
-              key={c}
-              className="rounded-md border border-border bg-card/80 px-4 py-2 text-sm font-semibold uppercase tracking-wide backdrop-blur transition-colors hover:border-primary/70"
+            <Link
+              key={c.slug}
+              to="/regras/$slug"
+              params={{ slug: c.slug }}
+              className="inline-flex items-center gap-2 rounded-md border border-border bg-card/80 px-4 py-2 text-sm font-semibold uppercase tracking-wide backdrop-blur transition-colors hover:border-primary/70 hover:bg-primary/10 hover:text-primary"
             >
-              {c}
-            </span>
+              {c.icon && <span aria-hidden>{c.icon}</span>}
+              {c.name}
+            </Link>
           ))}
         </div>
+
 
         <h2 className="mt-14 font-display text-3xl uppercase">Ações Disponíveis</h2>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
