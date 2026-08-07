@@ -124,7 +124,7 @@ export function CollectionPanel({
       )}
 
       <Dialog open={editing !== null} onOpenChange={(open) => !open && close()}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing?.id ? "Editar" : "Adicionar"} — {title}</DialogTitle>
           </DialogHeader>

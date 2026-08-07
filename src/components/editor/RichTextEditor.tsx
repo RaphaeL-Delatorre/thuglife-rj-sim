@@ -486,8 +486,8 @@ export function RichTextEditor({
           onChange={(v) => v && exec("formatBlock", `<${v}>`)}
         />
         <Divider />
-        <ColorMenu title="Cor da letra" label="A🎨" onPick={(c) => exec("foreColor", c)} />
-        <ColorMenu title="Cor de fundo do texto" label="▧" onPick={(c) => exec("hiliteColor", c)} />
+        <ColorMenu title="Cor da letra" label="A●" onPick={(c) => exec("foreColor", c)} />
+        <ColorMenu title="Cor de fundo do texto" label="▨" onPick={(c) => exec("hiliteColor", c)} />
         <Divider />
         <TB title="Alinhar à esquerda" active={state.left} onClick={() => exec("justifyLeft")}>⇤</TB>
         <TB title="Centralizar" active={state.center} onClick={() => exec("justifyCenter")}>≡</TB>
@@ -523,15 +523,15 @@ export function RichTextEditor({
         />
         <Divider />
         <TB title="Inserir link" onClick={promptInsert.link}>🔗</TB>
-        <TB title="Remover link" onClick={() => exec("unlink")}>⛓️‍💥</TB>
+        <TB title="Remover link" onClick={() => exec("unlink")}>🔗✕</TB>
         <TB title="Inserir imagem" onClick={promptInsert.image}>🖼️</TB>
         <TB title="Inserir vídeo" onClick={promptInsert.video}>🎬</TB>
         <TB title="Inserir tabela" onClick={promptInsert.table}>▦</TB>
         <Divider />
         <ColorMenu title="Moldura (escolha a cor)" label="▭" onPick={frame} />
-        <ColorMenu title="Caixa de aviso com moldura" label="⚠▭" onPick={calloutFrame} />
-        <ColorMenu title="Texto com brilho" label="✨A" onPick={glow} />
-        <ColorMenu title="Texto com moldura (destaque)" label="🅰▢" onPick={badge} />
+        <ColorMenu title="Caixa de aviso com moldura" label="⚠▣" onPick={calloutFrame} />
+        <ColorMenu title="Texto com brilho" label="A✨" onPick={glow} />
+        <ColorMenu title="Texto com moldura (destaque)" label="A▢" onPick={badge} />
         <Divider />
         <TB title="Item de regra numerado" onClick={ruleItem}>§</TB>
         <TB title="Bloco de destaque (número grande)" onClick={stat}>#</TB>
