@@ -4,6 +4,7 @@ import { useState } from "react";
 import logoAsset from "@/assets/logo-tl.png.asset.json";
 import { RichContent } from "@/components/editor/RichContent";
 import { getRuleCategory } from "@/lib/site.functions";
+import type { RuleCategoryPage } from "@/lib/site.functions";
 
 const logoImg = logoAsset.url;
 
@@ -147,7 +148,7 @@ function Secao({
 }
 
 function CategoriaPage() {
-  const { category, sections, rules } = Route.useLoaderData();
+  const { category, sections, rules }: RuleCategoryPage = Route.useLoaderData();
   const [busca, setBusca] = useState("");
   if (!category) return <Fallback title="Categoria não encontrada" />;
 

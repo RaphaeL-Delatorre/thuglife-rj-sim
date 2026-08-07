@@ -6,6 +6,7 @@ import news2Asset from "@/assets/tl-3.png.asset.json";
 import news3Asset from "@/assets/tl-4.png.asset.json";
 import logoAsset from "@/assets/logo-tl.png.asset.json";
 import { getSiteContent } from "@/lib/site.functions";
+import type { SiteContent } from "@/lib/site.functions";
 
 const logoImg = logoAsset.url;
 const bgSlides = [heroAsset.url, news1Asset.url, news2Asset.url, news3Asset.url];
@@ -124,7 +125,7 @@ const faqFallback = [
 
 function Index() {
   const [open, setOpen] = useState<number | null>(0);
-  const content = Route.useLoaderData();
+  const content: SiteContent = Route.useLoaderData();
   const cfg = content.settings;
 
   const stats = content.stats.length

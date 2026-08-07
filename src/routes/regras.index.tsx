@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import logoAsset from "@/assets/logo-tl.png.asset.json";
 import { getSiteContent } from "@/lib/site.functions";
+import type { SiteContent } from "@/lib/site.functions";
 
 const logoImg = logoAsset.url;
 
@@ -193,7 +194,7 @@ function Bloco({ secao, busca }: { secao: Secao; busca: string }) {
 
 function RegrasPage() {
   const [busca, setBusca] = useState("");
-  const content = Route.useLoaderData();
+  const content: SiteContent = Route.useLoaderData();
   const cfg = content.settings;
 
   const build = (block: string): Secao[] =>
