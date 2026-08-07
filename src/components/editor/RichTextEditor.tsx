@@ -540,12 +540,44 @@ export function RichTextEditor({
     },
   };
 
-  const frame = (color: string) =>
+  const frame = (fill: string, stroke: string) =>
     wrapSelection(
-      `<div class="rc-frame" style="border-color:${color};box-shadow:inset 0 0 0 1px ${color}33"><div>`,
+      `<div class="rc-frame" style="border:1px solid ${stroke};border-radius:0.9rem;background:${fill}"><div>`,
       `</div></div><p><br></p>`,
       "Conteúdo em moldura.",
     );
+
+  const textHighlight = (fill: string, stroke: string) =>
+    wrapSelection(
+      `<span class="rc-hl" style="background:${fill};border:1px solid ${stroke}">`,
+      `</span>`,
+      "texto destacado",
+    );
+
+  /** Aplica o caractere de marcador na lista onde está o cursor. */
+  const applyBullet = (char: string) => {
+    focusEditor();
+    const sel = window.getSelection();
+    let node: Node | null = sel && sel.rangeCount > 0 ? sel.getRangeAt(0).startContainer : null;
+    let list: HTMLUListElement | null = null;
+    while (node && node !== ref.current) {
+      if (node.nodeType === 1 && (node as HTMLElement).tagName === "UL") {
+        list = node as HTMLUListElement;
+        break;
+      }
+      node = node.parentNode;
+    }
+    if (!list) {
+      insertHTML(
+        `<ul class="rc-bullets" style="--rc-bullet:'${char}'"><li>Primeiro item</li><li>Segundo item</li></ul><p><br></p>`,
+      );
+      return;
+    }
+    list.classList.add("rc-bullets");
+    list.style.setProperty("--rc-bullet", `'${char}'`);
+    emit();
+  };
+
 
   const calloutFrame = (color: string) => {
     const title = window.prompt("Título do aviso", "AVISO CRÍTICO") ?? "AVISO";
