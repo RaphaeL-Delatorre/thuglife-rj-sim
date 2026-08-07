@@ -211,9 +211,12 @@ function RegrasPage() {
   const dbGerais = build("gerais");
   const termos = dbTermos.length ? dbTermos : termosFallback;
   const gerais = dbGerais.length ? dbGerais : geraisFallback;
-  const categorias = content.categories.length
-    ? content.categories.map((c) => c.name)
-    : categoriasFallback;
+  const categorias = content.categories.map((c) => ({
+    name: c.name,
+    slug: c.slug,
+    icon: c.icon ?? "",
+  }));
+
   const acoes = content.actions.length
     ? content.actions.map((a) => ({
         porte: a.porte ?? "",
