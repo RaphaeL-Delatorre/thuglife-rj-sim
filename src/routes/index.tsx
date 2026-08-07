@@ -69,9 +69,35 @@ const news = [
 
 const requisitos = [
   { n: "01", t: "Ter 16 anos ou mais", d: "Contas verificadas no Discord com idade mínima declarada." },
-  { n: "02", t: "GTA V original", d: "Cópia legítima na Steam, Epic ou Rockstar Launcher + FiveM instalado." },
+  { n: "02", t: "GTA V Original + FiveM", d: "Cópia legítima na Steam, Epic ou Rockstar Launcher + FiveM instalado." },
   { n: "03", t: "Microfone funcionando", d: "Todo o roleplay acontece por voz. Áudio limpo é obrigatório." },
   { n: "04", t: "Ler as regras", d: "Whitelist só é liberada após a prova de regras dentro do Discord." },
+];
+
+const DISCORD_URL = "https://discord.gg/thugliferj";
+const CONNECT_URL = "fivem://connect/fivem.equipetl.com";
+
+const socials = [
+  {
+    name: "Instagram",
+    href: "https://www.instagram.com/thuglifefivem/",
+    path: "M12 2.2c3.2 0 3.6 0 4.9.07 1.2.05 1.8.25 2.2.42.6.22 1 .49 1.4.9.42.41.69.82.91 1.4.17.42.37 1.05.42 2.23.06 1.28.07 1.66.07 4.88s0 3.6-.07 4.88c-.05 1.18-.25 1.8-.42 2.23a3.7 3.7 0 0 1-.9 1.4c-.42.41-.83.68-1.41.9-.42.17-1.05.37-2.23.42-1.27.06-1.65.07-4.87.07s-3.6 0-4.88-.07c-1.18-.05-1.8-.25-2.23-.42a3.7 3.7 0 0 1-1.4-.9 3.7 3.7 0 0 1-.9-1.4c-.17-.42-.37-1.05-.42-2.23C2.2 15.6 2.2 15.22 2.2 12s0-3.6.07-4.88c.05-1.18.25-1.8.42-2.23.22-.58.49-.99.9-1.4.41-.41.82-.68 1.4-.9.43-.17 1.05-.37 2.23-.42C8.5 2.2 8.88 2.2 12 2.2Zm0 3.24a6.56 6.56 0 1 0 0 13.12 6.56 6.56 0 0 0 0-13.12Zm0 10.82a4.26 4.26 0 1 1 0-8.52 4.26 4.26 0 0 1 0 8.52Zm8.35-11.08a1.53 1.53 0 1 1-3.06 0 1.53 1.53 0 0 1 3.06 0Z",
+  },
+  {
+    name: "YouTube",
+    href: "https://www.youtube.com/@ThugLifeRJGames/videos",
+    path: "M23 12s0-3.2-.4-4.74a2.5 2.5 0 0 0-1.76-1.77C19.28 5.1 12 5.1 12 5.1s-7.28 0-8.84.4A2.5 2.5 0 0 0 1.4 7.26C1 8.8 1 12 1 12s0 3.2.4 4.74a2.5 2.5 0 0 0 1.76 1.77c1.56.39 8.84.39 8.84.39s7.28 0 8.84-.4a2.5 2.5 0 0 0 1.76-1.76C23 15.2 23 12 23 12ZM9.75 15.02V8.98L15.5 12l-5.75 3.02Z",
+  },
+  {
+    name: "TikTok",
+    href: "https://www.tiktok.com/@thugliferjsd",
+    path: "M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.1v12.4a2.59 2.59 0 1 1-1.83-2.48v-3.2a5.72 5.72 0 1 0 4.93 5.67V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3a4.3 4.3 0 0 1-3.24-1.48Z",
+  },
+  {
+    name: "Discord",
+    href: DISCORD_URL,
+    path: "M20.32 5.56A18 18 0 0 0 15.9 4.2l-.22.4a13.6 13.6 0 0 1 3.9 1.98 18.6 18.6 0 0 0-15.16 0A13.6 13.6 0 0 1 8.32 4.6l-.22-.4a18 18 0 0 0-4.42 1.36C.9 9.66.14 13.65.52 17.58a18.2 18.2 0 0 0 5.5 2.77l1.2-1.66c-.66-.25-1.29-.55-1.88-.9l.46-.35a13 13 0 0 0 11.12 0l.46.35c-.6.35-1.22.65-1.88.9l1.2 1.66c1.96-.6 3.83-1.54 5.5-2.77.45-4.56-.76-8.5-2.88-12.02ZM8.4 15.2c-1.06 0-1.94-.98-1.94-2.18s.85-2.19 1.94-2.19c1.1 0 1.97.99 1.95 2.19 0 1.2-.86 2.18-1.95 2.18Zm7.2 0c-1.07 0-1.94-.98-1.94-2.18s.85-2.19 1.94-2.19c1.1 0 1.96.99 1.94 2.19 0 1.2-.85 2.18-1.94 2.18Z",
+  },
 ];
 
 const faq = [
@@ -247,9 +273,42 @@ function Index() {
                 <span className="font-display text-3xl text-primary">{r.n}</span>
                 <h3 className="mt-3 font-display text-lg uppercase">{r.t}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">{r.d}</p>
+                {r.n === "02" && (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <a
+                      href="https://store.steampowered.com/app/3240220/Grand_Theft_Auto_V_Enhanced/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md bg-primary px-3 py-2 text-xs font-bold uppercase tracking-wider text-primary-foreground transition-transform hover:scale-105"
+                    >
+                      Comprar GTA V
+                    </a>
+                    <a
+                      href="https://fivem.net/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md border border-primary/60 px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors hover:bg-primary/15"
+                    >
+                      Baixar FiveM
+                    </a>
+                  </div>
+                )}
               </div>
             ))}
           </div>
+
+          <div className="mt-10 flex justify-center">
+            <a
+              href={CONNECT_URL}
+              className="inline-flex items-center gap-3 rounded-lg bg-primary px-8 py-4 font-display text-xl uppercase tracking-wider text-primary-foreground shadow-[var(--shadow-glow)] transition-transform hover:scale-105"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6" aria-hidden>
+                <path d="M7 7h10a5 5 0 0 1 5 5v1a4 4 0 0 1-7.2 2.4L14 14h-4l-.8 1.4A4 4 0 0 1 2 13v-1a5 5 0 0 1 5-5Zm-1 3v1.5H4.5v1H6V14h1v-1.5h1.5v-1H7V10H6Zm10.5 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm2 2.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z" />
+              </svg>
+              Jogue Agora!
+            </a>
+          </div>
+
           <div className="mt-10 flex flex-wrap items-center gap-4 rounded-xl border border-primary/50 bg-card/85 p-6 shadow-[var(--shadow-glow)] backdrop-blur">
             <div className="flex-1">
               <h3 className="font-display text-2xl uppercase">Pronto pro corre?</h3>
@@ -258,7 +317,9 @@ function Index() {
               </p>
             </div>
             <a
-              href="#duvidas"
+              href={DISCORD_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="rounded-md px-6 py-3 font-display text-lg uppercase text-primary-foreground"
               style={{ background: "var(--gradient-gold)" }}
             >
@@ -301,6 +362,23 @@ function Index() {
             className="h-18 w-18 rounded-lg object-cover ring-1 ring-primary/40"
           />
           <p className="font-display text-lg uppercase tracking-wide">Thug Life RJ</p>
+          <ul className="flex items-center gap-5">
+            {socials.map((s) => (
+              <li key={s.name}>
+                <a
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.name}
+                  className="block text-muted-foreground transition-colors hover:text-primary"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="h-7 w-7" aria-hidden>
+                    <path d={s.path} />
+                  </svg>
+                </a>
+              </li>
+            ))}
+          </ul>
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} Thug Life RJ. Servidor de roleplay não afiliado à Rockstar Games ou Take-Two.
           </p>
