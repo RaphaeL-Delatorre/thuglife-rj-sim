@@ -273,9 +273,42 @@ function Index() {
                 <span className="font-display text-3xl text-primary">{r.n}</span>
                 <h3 className="mt-3 font-display text-lg uppercase">{r.t}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">{r.d}</p>
+                {r.n === "02" && (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <a
+                      href="https://store.steampowered.com/app/3240220/Grand_Theft_Auto_V_Enhanced/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md bg-primary px-3 py-2 text-xs font-bold uppercase tracking-wider text-primary-foreground transition-transform hover:scale-105"
+                    >
+                      Comprar GTA V
+                    </a>
+                    <a
+                      href="https://fivem.net/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-md border border-primary/60 px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors hover:bg-primary/15"
+                    >
+                      Baixar FiveM
+                    </a>
+                  </div>
+                )}
               </div>
             ))}
           </div>
+
+          <div className="mt-10 flex justify-center">
+            <a
+              href={CONNECT_URL}
+              className="inline-flex items-center gap-3 rounded-lg bg-primary px-8 py-4 font-display text-xl uppercase tracking-wider text-primary-foreground shadow-[var(--shadow-glow)] transition-transform hover:scale-105"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6" aria-hidden>
+                <path d="M7 7h10a5 5 0 0 1 5 5v1a4 4 0 0 1-7.2 2.4L14 14h-4l-.8 1.4A4 4 0 0 1 2 13v-1a5 5 0 0 1 5-5Zm-1 3v1.5H4.5v1H6V14h1v-1.5h1.5v-1H7V10H6Zm10.5 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm2 2.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z" />
+              </svg>
+              Jogue Agora!
+            </a>
+          </div>
+
           <div className="mt-10 flex flex-wrap items-center gap-4 rounded-xl border border-primary/50 bg-card/85 p-6 shadow-[var(--shadow-glow)] backdrop-blur">
             <div className="flex-1">
               <h3 className="font-display text-2xl uppercase">Pronto pro corre?</h3>
@@ -284,7 +317,9 @@ function Index() {
               </p>
             </div>
             <a
-              href="#duvidas"
+              href={DISCORD_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="rounded-md px-6 py-3 font-display text-lg uppercase text-primary-foreground"
               style={{ background: "var(--gradient-gold)" }}
             >
