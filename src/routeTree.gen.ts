@@ -41,9 +41,9 @@ const RegrasIndexRoute = RegrasIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegrasSlugRoute = RegrasSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => RegrasRoute,
+  id: '/regras/$slug',
+  path: '/regras/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -88,6 +88,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  RegrasSlugRoute: typeof RegrasSlugRoute
   RegrasIndexRoute: typeof RegrasIndexRoute
 }
 
@@ -130,10 +131,10 @@ declare module '@tanstack/react-router' {
     }
     '/regras/$slug': {
       id: '/regras/$slug'
-      path: '/$slug'
+      path: '/regras/$slug'
       fullPath: '/regras/$slug'
       preLoaderRoute: typeof RegrasSlugRouteImport
-      parentRoute: typeof RegrasRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -153,6 +154,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  RegrasSlugRoute: RegrasSlugRoute,
   RegrasIndexRoute: RegrasIndexRoute,
 }
 export const routeTree = rootRouteImport
