@@ -29,10 +29,20 @@ export const saveRecord = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { looseAdmin, requirePerm, tablePerm } = await import("./admin.server");
     await requirePerm(context.userId, tablePerm(data.table, data.id ? "edit" : "create"));
+    const values = { ...data.values };
+    if (data.table === "rule_categories") {
+      const raw = String(values["slug"] ?? "").trim() || String(values["name"] ?? "");
+      values["slug"] = raw
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
     const db = await looseAdmin();
     const { error } = data.id
-      ? await db.from(data.table).update(data.values).eq("id", data.id)
-      : await db.from(data.table).insert(data.values);
+      ? await db.from(data.table).update(values).eq("id", data.id)
+      : await db.from(data.table).insert(values);
 
     if (error) throw new Error(error.message);
     return { ok: true };

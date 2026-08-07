@@ -5,7 +5,7 @@ import { getSiteContent } from "@/lib/site.functions";
 
 const logoImg = logoAsset.url;
 
-export const Route = createFileRoute("/regras")({
+export const Route = createFileRoute("/regras/")({
   loader: () => getSiteContent(),
   component: RegrasPage,
   head: () => ({

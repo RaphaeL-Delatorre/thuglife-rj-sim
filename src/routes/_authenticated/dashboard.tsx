@@ -6,7 +6,7 @@ import { useState } from "react";
 import { AccountsPanel, type Profile } from "@/components/dashboard/AccountsPanel";
 import { CollectionPanel } from "@/components/dashboard/CollectionPanel";
 import { RolesPanel, type Role } from "@/components/dashboard/RolesPanel";
-import { RulesPanel, type RuleItem, type RuleSection } from "@/components/dashboard/RulesPanel";
+import { RulesPanel, type RuleCategory, type RuleItem, type RuleSection } from "@/components/dashboard/RulesPanel";
 import { SettingsPanel } from "@/components/dashboard/SettingsPanel";
 import type { FieldDef, RecordValues } from "@/components/dashboard/fields";
 import { Button } from "@/components/ui/button";
@@ -41,7 +41,19 @@ const FAQ_FIELDS: FieldDef[] = [
 ];
 
 const CATEGORY_FIELDS: FieldDef[] = [
-  { key: "name", label: "Nome da categoria", type: "text" },
+  { key: "name", label: "Nome da categoria", type: "text", placeholder: "Ex.: Regras de Ações" },
+  {
+    key: "slug",
+    label: "Endereço da página",
+    type: "text",
+    placeholder: "regras-acoes",
+    hint: "A página fica em /regras/o-que-você-digitar (use apenas letras minúsculas e hifens).",
+  },
+  { key: "icon", label: "Ícone / emoji", type: "text", placeholder: "Ex.: 🎯" },
+  { key: "subtitle", label: "Subtítulo", type: "text", placeholder: "Diretrizes para sequestros, guerras..." },
+  { key: "description", label: "Descrição curta", type: "textarea" },
+  { key: "content_html", label: "Conteúdo da página (editor completo)", type: "richtext" },
+  { key: "published", label: "Publicada no site", type: "switch" },
   { key: "sort_order", label: "Ordem", type: "number" },
 ];
 
@@ -181,20 +193,24 @@ function DashboardPage() {
             <RulesPanel
               sections={data.sections as RuleSection[]}
               rules={data.rules as RuleItem[]}
+              categories={data.categories as RuleCategory[]}
               can={allow}
               onChanged={reload}
             />
           )}
           {tab === "categories" && (
             <CollectionPanel
-              title="Categorias de regras"
-              description="Etiquetas exibidas na página de regras."
+              title="Categorias de regras (páginas)"
+              description="Cada categoria vira uma página própria em /regras/endereço, com conteúdo escrito no editor completo."
               table="rule_categories"
               permPrefix="rule_categories"
               fields={CATEGORY_FIELDS}
               rows={rows(data.categories)}
               columns={[
+                { key: "icon", label: "Ícone" },
                 { key: "name", label: "Nome" },
+                { key: "slug", label: "Endereço" },
+                { key: "published", label: "Publicada" },
                 { key: "sort_order", label: "Ordem" },
               ]}
               can={allow}
