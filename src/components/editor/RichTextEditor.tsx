@@ -202,6 +202,148 @@ function ColorMenu({
   );
 }
 
+/** Menu com duas cores: preenchimento e traçado (borda). */
+function FillStrokeMenu({
+  label,
+  title,
+  defaultFill,
+  defaultStroke,
+  onApply,
+}: {
+  label: React.ReactNode;
+  title: string;
+  defaultFill: string;
+  defaultStroke: string;
+  onApply: (fill: string, stroke: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [fill, setFill] = useState(defaultFill);
+  const [stroke, setStroke] = useState(defaultStroke);
+
+  const row = (current: string, set: (v: string) => void) => (
+    <div className="mt-1 grid grid-cols-10 gap-1">
+      {COLORS.map((c) => (
+        <button
+          key={c}
+          type="button"
+          title={c}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => set(c)}
+          className={`h-5 w-5 rounded border ${current === c ? "border-primary ring-1 ring-primary" : "border-border"}`}
+          style={{ background: c }}
+        />
+      ))}
+    </div>
+  );
+
+  return (
+    <span className="relative">
+      <TB title={title} onClick={() => setOpen((o) => !o)}>
+        {label}
+      </TB>
+      {open && (
+        <div className="absolute left-0 top-9 z-50 w-[16rem] rounded-lg border border-border bg-popover p-3 shadow-xl">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            Cor do preenchimento
+          </p>
+          {row(fill, setFill)}
+          <div className="mt-2 flex items-center gap-2">
+            <input
+              type="color"
+              aria-label="Preenchimento personalizado"
+              value={fill}
+              onChange={(e) => setFill(e.target.value)}
+              className="h-7 w-16 cursor-pointer rounded border border-border bg-background"
+            />
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => setFill("transparent")}
+              className="rounded border border-border px-2 py-1 text-[11px] hover:bg-secondary"
+            >
+              Sem preenchimento
+            </button>
+          </div>
+
+          <p className="mt-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            Cor do traçado (borda)
+          </p>
+          {row(stroke, setStroke)}
+          <div className="mt-2 flex items-center gap-2">
+            <input
+              type="color"
+              aria-label="Traçado personalizado"
+              value={stroke}
+              onChange={(e) => setStroke(e.target.value)}
+              className="h-7 w-16 cursor-pointer rounded border border-border bg-background"
+            />
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => setStroke("transparent")}
+              className="rounded border border-border px-2 py-1 text-[11px] hover:bg-secondary"
+            >
+              Sem traçado
+            </button>
+          </div>
+
+          <div
+            className="mt-3 rounded-xl border px-3 py-2 text-xs"
+            style={{ background: fill, borderColor: stroke }}
+          >
+            Pré-visualização da moldura
+          </div>
+
+          <Button
+            type="button"
+            size="sm"
+            className="mt-3 w-full"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => {
+              onApply(fill, stroke);
+              setOpen(false);
+            }}
+          >
+            Aplicar
+          </Button>
+        </div>
+      )}
+    </span>
+  );
+}
+
+function BulletMenu({ onPick }: { onPick: (char: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="relative">
+      <TB title="Marcador da lista" onClick={() => setOpen((o) => !o)}>
+        ◉—
+      </TB>
+      {open && (
+        <div className="absolute left-0 top-9 z-50 grid max-h-[15rem] w-[17rem] grid-cols-10 gap-1 overflow-y-auto rounded-lg border border-border bg-popover p-2 shadow-xl">
+          {BULLETS.map((b, i) => (
+            <button
+              key={`${b}-${i}`}
+              type="button"
+              title={`Marcador ${b}`}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                onPick(b);
+                setOpen(false);
+              }}
+              className="rounded p-1 text-sm hover:bg-secondary"
+            >
+              {b}
+            </button>
+          ))}
+        </div>
+      )}
+    </span>
+  );
+}
+
+
+
 /* ── Editor ──────────────────────────────────────────────────────────── */
 
 export function RichTextEditor({
