@@ -44,6 +44,23 @@ const EMOJIS = [
   "⏳","📅","📖","📝","📢","💬","🗣️","🤝","🙏","👊","👍","👎","🧠","💀","☠️","🩸","🎭","🎮","🎧","🎬",
 ];
 
+const BULLETS = [
+  "•","·","⊛","◉","○","◌","◍","◎","●","◘","◦","☉","⁃","⁌","⁍","◆","◇","◈","★","☆",
+  "■","□","☐","☑","☒","✓","✔","❥","❧","☙","☸","✤","✱","✲","↠","↣","↦","↬","⇛","⇝",
+  "⇢","⇨","➙","➛","➜","➝","➞","➟","➠","➡","➢","➣","➤","➥","➦","➧","➨","➮","➱","➲",
+  "➳","➵","➸","➼","➽","➾","→","⇾","⇒","‣","▶","▷","▸","▹","►","▻",
+];
+
+const ALIGNMENTS = [
+  { label: "Alinhar à esquerda", value: "justifyLeft" },
+  { label: "Alinhar no centro", value: "justifyCenter" },
+  { label: "Alinhar à direita", value: "justifyRight" },
+  { label: "Justificar", value: "justifyFull" },
+  { label: "Aumentar recuo", value: "indent" },
+  { label: "Diminuir recuo", value: "outdent" },
+];
+
+
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
 type SelectionState = {
