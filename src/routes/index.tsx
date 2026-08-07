@@ -164,6 +164,7 @@ function Index() {
             <li><a href="#noticias" className="text-muted-foreground transition-colors hover:text-primary">Notícias</a></li>
             <li><a href="#jogar" className="text-muted-foreground transition-colors hover:text-primary">Jogar</a></li>
             <li><a href="#duvidas" className="text-muted-foreground transition-colors hover:text-primary">Dúvidas</a></li>
+            <li><Link to="/regras" className="text-muted-foreground transition-colors hover:text-primary">Regras</Link></li>
           </ul>
           <a
             href="#jogar"
