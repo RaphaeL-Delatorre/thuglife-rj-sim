@@ -734,7 +734,14 @@ export function RichTextEditor({
         <TB title="Inserir vídeo" onClick={promptInsert.video}>🎬</TB>
         <TB title="Inserir tabela" onClick={promptInsert.table}>▦</TB>
         <Divider />
-        <ColorMenu title="Moldura (escolha a cor)" label="▭" onPick={frame} />
+        <FillStrokeMenu
+          title="Moldura (preenchimento e traçado)"
+          label="▭"
+          defaultFill="#150a0c"
+          defaultStroke="#ef4444"
+          onApply={frame}
+        />
+
         <ColorMenu title="Caixa de aviso com moldura" label="⚠▣" onPick={calloutFrame} />
         <ColorMenu title="Texto com brilho" label="A✨" onPick={glow} />
         <ColorMenu title="Texto com moldura (destaque)" label="A▢" onPick={badge} />
