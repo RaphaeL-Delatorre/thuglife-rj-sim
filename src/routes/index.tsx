@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import heroAsset from "@/assets/tl.png.asset.json";
 import news1Asset from "@/assets/tl-2.png.asset.json";
@@ -164,6 +164,7 @@ function Index() {
             <li><a href="#noticias" className="text-muted-foreground transition-colors hover:text-primary">Notícias</a></li>
             <li><a href="#jogar" className="text-muted-foreground transition-colors hover:text-primary">Jogar</a></li>
             <li><a href="#duvidas" className="text-muted-foreground transition-colors hover:text-primary">Dúvidas</a></li>
+            <li><Link to="/regras" className="text-muted-foreground transition-colors hover:text-primary">Regras</Link></li>
           </ul>
           <a
             href="#jogar"
