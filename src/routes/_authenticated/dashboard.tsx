@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 
 import { AccountsPanel, type Profile } from "@/components/dashboard/AccountsPanel";
+import { CategoryMenusPanel } from "@/components/dashboard/CategoryMenusPanel";
 import { CollectionPanel } from "@/components/dashboard/CollectionPanel";
 import { RolesPanel, type Role } from "@/components/dashboard/RolesPanel";
 import { RulesPanel, type RuleCategory, type RuleItem, type RuleSection } from "@/components/dashboard/RulesPanel";
