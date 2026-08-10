@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 
 import { AccountsPanel, type Profile } from "@/components/dashboard/AccountsPanel";
+import { CategoryMenusPanel } from "@/components/dashboard/CategoryMenusPanel";
 import { CollectionPanel } from "@/components/dashboard/CollectionPanel";
 import { RolesPanel, type Role } from "@/components/dashboard/RolesPanel";
 import { RulesPanel, type RuleCategory, type RuleItem, type RuleSection } from "@/components/dashboard/RulesPanel";
@@ -199,24 +200,34 @@ function DashboardPage() {
             />
           )}
           {tab === "categories" && (
-            <CollectionPanel
-              title="Categorias de regras (páginas)"
-              description="Cada categoria vira uma página própria em /regras/endereço, com conteúdo escrito no editor completo."
-              table="rule_categories"
-              permPrefix="rule_categories"
-              fields={CATEGORY_FIELDS}
-              rows={rows(data.categories)}
-              columns={[
-                { key: "icon", label: "Ícone" },
-                { key: "name", label: "Nome" },
-                { key: "slug", label: "Endereço" },
-                { key: "published", label: "Publicada" },
-                { key: "sort_order", label: "Ordem" },
-              ]}
-              can={allow}
-              onChanged={reload}
-            />
+            <div className="space-y-12">
+              <CollectionPanel
+                title="Categorias de regras (páginas)"
+                description="Cada categoria vira uma página própria em /regras/endereço, com conteúdo escrito no editor completo."
+                table="rule_categories"
+                permPrefix="rule_categories"
+                fields={CATEGORY_FIELDS}
+                rows={rows(data.categories)}
+                columns={[
+                  { key: "icon", label: "Ícone" },
+                  { key: "name", label: "Nome" },
+                  { key: "slug", label: "Endereço" },
+                  { key: "published", label: "Publicada" },
+                  { key: "sort_order", label: "Ordem" },
+                ]}
+                can={allow}
+                onChanged={reload}
+              />
+              <CategoryMenusPanel
+                categories={data.categories as RuleCategory[]}
+                sections={data.sections as RuleSection[]}
+                rules={data.rules as RuleItem[]}
+                can={allow}
+                onChanged={reload}
+              />
+            </div>
           )}
+
           {tab === "actions" && (
             <CollectionPanel
               title="Ações disponíveis"
