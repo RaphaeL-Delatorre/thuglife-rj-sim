@@ -182,10 +182,16 @@ function CategoriaPage() {
         </div>
       )}
 
+      {category.intro_html && (
+        <div className="mt-8">
+          <RichContent html={category.intro_html} />
+        </div>
+      )}
+
       {category.content_html && (
-        <article className="mt-8 rounded-xl border border-border bg-card/80 p-6 backdrop-blur-md">
+        <div className="mt-8">
           <RichContent html={category.content_html} />
-        </article>
+        </div>
       )}
 
       <div className="mt-8 space-y-4">
@@ -203,6 +209,12 @@ function CategoriaPage() {
           />
         ))}
       </div>
+
+      {category.outro_html && (
+        <div className="mt-8">
+          <RichContent html={category.outro_html} />
+        </div>
+      )}
     </Shell>
   );
 }
