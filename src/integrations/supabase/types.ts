@@ -17,6 +17,8 @@ export type Database = {
       actions: {
         Row: {
           bandidos: number
+          html: string
+          icon: string
           id: string
           nome: string
           policia: number
@@ -26,6 +28,8 @@ export type Database = {
         }
         Insert: {
           bandidos?: number
+          html?: string
+          icon?: string
           id?: string
           nome: string
           policia?: number
@@ -35,6 +39,8 @@ export type Database = {
         }
         Update: {
           bandidos?: number
+          html?: string
+          icon?: string
           id?: string
           nome?: string
           policia?: number
