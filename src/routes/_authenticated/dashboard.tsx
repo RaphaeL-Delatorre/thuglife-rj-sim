@@ -53,7 +53,19 @@ const CATEGORY_FIELDS: FieldDef[] = [
   { key: "icon", label: "Ícone / emoji", type: "text", placeholder: "Ex.: 🎯" },
   { key: "subtitle", label: "Subtítulo", type: "text", placeholder: "Diretrizes para sequestros, guerras..." },
   { key: "description", label: "Descrição curta", type: "textarea" },
+  {
+    key: "intro_html",
+    label: "Mensagem do topo (antes dos menus)",
+    type: "richtext",
+    hint: "Aparece no início da página, fora da moldura dos menus.",
+  },
   { key: "content_html", label: "Conteúdo da página (editor completo)", type: "richtext" },
+  {
+    key: "outro_html",
+    label: "Mensagem final (depois dos menus)",
+    type: "richtext",
+    hint: "Aparece no fim da página, fora da moldura dos menus.",
+  },
   { key: "published", label: "Publicada no site", type: "switch" },
   { key: "sort_order", label: "Ordem", type: "number" },
 ];

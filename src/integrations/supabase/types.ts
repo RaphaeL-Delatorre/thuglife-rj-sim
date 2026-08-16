@@ -184,7 +184,9 @@ export type Database = {
           description: string
           icon: string
           id: string
+          intro_html: string
           name: string
+          outro_html: string
           published: boolean
           slug: string
           sort_order: number
@@ -195,7 +197,9 @@ export type Database = {
           description?: string
           icon?: string
           id?: string
+          intro_html?: string
           name: string
+          outro_html?: string
           published?: boolean
           slug?: string
           sort_order?: number
@@ -206,7 +210,9 @@ export type Database = {
           description?: string
           icon?: string
           id?: string
+          intro_html?: string
           name?: string
+          outro_html?: string
           published?: boolean
           slug?: string
           sort_order?: number
