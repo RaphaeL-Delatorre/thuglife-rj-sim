@@ -28,7 +28,7 @@ export const getSiteContent = createServerFn({ method: "GET" }).handler(async ()
     db.from("requirements").select("id, num, title, description, sort_order").order("sort_order"),
     db.from("news").select("id, tag, title, body, sort_order").order("sort_order"),
     db.from("faqs").select("id, question, answer, sort_order").order("sort_order"),
-    db.from("rule_categories").select("id, name, slug, icon, subtitle, description, content_html, published, sort_order").eq("published", true).order("sort_order"),
+    db.from("rule_categories").select("id, name, slug, icon, subtitle, description, content_html, intro_html, outro_html, published, sort_order").eq("published", true).order("sort_order"),
     db.from("rule_sections").select("id, block, title, icon, body_html, category_id, sort_order").order("sort_order"),
     db.from("rules").select("id, section_id, code, text, html, sort_order").order("sort_order"),
     db.from("actions").select("id, porte, nome, bandidos, policia, regras, sort_order").order("sort_order"),
@@ -55,7 +55,7 @@ export const getRuleCategory = createServerFn({ method: "GET" })
     const db = publicClient();
     const { data: category } = await db
       .from("rule_categories")
-      .select("id, name, slug, icon, subtitle, description, content_html, published, sort_order")
+      .select("id, name, slug, icon, subtitle, description, content_html, intro_html, outro_html, published, sort_order")
       .eq("slug", data.slug)
       .eq("published", true)
       .maybeSingle();
