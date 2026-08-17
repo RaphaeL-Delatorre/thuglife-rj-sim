@@ -63,12 +63,17 @@ function Menu({
 function RegrasPage() {
   const content: SiteContent = Route.useLoaderData();
   const cfg = content.settings;
+  const [busca, setBusca] = useState("");
+  const termo = busca.trim().toLowerCase();
+  const match = (...parts: (string | null | undefined)[]) =>
+    !termo || parts.some((p) => (p ?? "").toLowerCase().includes(termo));
 
   const termos = content.sections
     .filter((s) => !s.category_id && s.block === "termos")
     .sort((a, b) => a.sort_order - b.sort_order);
 
-  const categorias = content.categories;
+  const categorias = content.categories.filter((c) => match(c.name, c.subtitle, c.description));
+
 
   const portes: string[] = [];
   for (const a of content.actions) {
@@ -108,16 +113,38 @@ function RegrasPage() {
       </header>
 
       <main className="mx-auto max-w-4xl px-5 pt-28 pb-24">
-        <h1 className="font-display text-4xl uppercase sm:text-5xl">{cfg["rulesTitle"] || "Regras e Termos"}</h1>
+        <div className="flex justify-center">
+          <img
+            src={logoImg}
+            alt={`Logo ${cfg["siteName"] || "Thug Life RJ"}`}
+            width={160}
+            height={160}
+            className="h-32 w-32 rounded-xl object-cover ring-2 ring-primary/50 sm:h-40 sm:w-40"
+          />
+        </div>
+
+        <div className="mt-8 rounded-xl border border-border bg-card/80 p-5 backdrop-blur-md">
+          <label htmlFor="busca" className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+            🔍 Pesquisar nesta categoria
+          </label>
+          <input
+            id="busca"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Digite uma palavra ou termo..."
+            className="mt-3 w-full rounded-md border border-input bg-background/60 px-4 py-3 text-sm outline-none transition-colors focus:border-primary"
+          />
+        </div>
+
+        {cfg["rulesTopHtml"] && <RichContent html={cfg["rulesTopHtml"]} className="mt-8" />}
 
         <div className="mt-8 space-y-8 rounded-2xl border border-border bg-card/70 p-6 shadow-[var(--shadow-glow)] backdrop-blur-md sm:p-8">
-          {cfg["rulesTopHtml"] && <RichContent html={cfg["rulesTopHtml"]} />}
-
-          <Menu title={cfg["termsTitle"] || "Termos e Condições de Uso"} icon="📘">
+          <Menu title={cfg["termsTitle"] || "Termos e Condições de Uso"} icon="📘" defaultOpen={busca.length > 0}>
             {termos.length === 0 ? (
               <p className="text-sm text-muted-foreground">Conteúdo em atualização.</p>
             ) : (
               <div className="space-y-6">
+
                 {termos.map((s) => {
                   const itens = content.rules
                     .filter((r) => r.section_id === s.id)
@@ -180,7 +207,7 @@ function RegrasPage() {
           <section className="rounded-xl border border-border/70 bg-background/50 p-5">
             <h2 className="font-display text-lg uppercase tracking-wide">🎯 Ações Disponíveis no Servidor</h2>
             <div className="mt-2 h-px w-full bg-primary/60" />
-            {cfg["actionsIntroHtml"] && <RichContent html={cfg["actionsIntroHtml"]} className="mt-3" />}
+
             <div className="mt-4 space-y-6">
               {portes.map((porte) => (
                 <div key={porte} className="space-y-3">
@@ -188,8 +215,9 @@ function RegrasPage() {
                     <h3 className="text-sm font-bold uppercase tracking-wide text-primary">{porte}</h3>
                   )}
                   {content.actions
-                    .filter((a) => (a.porte ?? "") === porte)
+                    .filter((a) => (a.porte ?? "") === porte && match(a.nome, a.porte))
                     .map((a) => (
+
                       <Menu key={a.id} title={a.nome} icon={a.icon ?? ""}>
                         {a.html?.trim() ? (
                           <RichContent html={a.html} />
@@ -214,10 +242,11 @@ function RegrasPage() {
               )}
             </div>
           </section>
-
-          {cfg["rulesBottomHtml"] && <RichContent html={cfg["rulesBottomHtml"]} />}
         </div>
+
+        {cfg["rulesBottomHtml"] && <RichContent html={cfg["rulesBottomHtml"]} className="mt-8" />}
       </main>
+
     </div>
   );
 }
