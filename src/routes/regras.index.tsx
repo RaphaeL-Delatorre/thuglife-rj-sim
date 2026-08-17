@@ -63,12 +63,17 @@ function Menu({
 function RegrasPage() {
   const content: SiteContent = Route.useLoaderData();
   const cfg = content.settings;
+  const [busca, setBusca] = useState("");
+  const termo = busca.trim().toLowerCase();
+  const match = (...parts: (string | null | undefined)[]) =>
+    !termo || parts.some((p) => (p ?? "").toLowerCase().includes(termo));
 
   const termos = content.sections
     .filter((s) => !s.category_id && s.block === "termos")
     .sort((a, b) => a.sort_order - b.sort_order);
 
-  const categorias = content.categories;
+  const categorias = content.categories.filter((c) => match(c.name, c.subtitle, c.description));
+
 
   const portes: string[] = [];
   for (const a of content.actions) {
