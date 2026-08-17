@@ -31,7 +31,7 @@ export const getSiteContent = createServerFn({ method: "GET" }).handler(async ()
     db.from("rule_categories").select("id, name, slug, icon, subtitle, description, content_html, intro_html, outro_html, published, sort_order").eq("published", true).order("sort_order"),
     db.from("rule_sections").select("id, block, title, icon, body_html, category_id, sort_order").order("sort_order"),
     db.from("rules").select("id, section_id, code, text, html, sort_order").order("sort_order"),
-    db.from("actions").select("id, porte, nome, bandidos, policia, regras, sort_order").order("sort_order"),
+    db.from("actions").select("id, porte, icon, nome, bandidos, policia, regras, html, sort_order").order("sort_order"),
   ]);
 
   return {

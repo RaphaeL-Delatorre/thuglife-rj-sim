@@ -188,11 +188,6 @@ function CategoriaPage() {
         </div>
       )}
 
-      {category.content_html && (
-        <div className="mt-8">
-          <RichContent html={category.content_html} />
-        </div>
-      )}
 
       <div className="mt-8 space-y-4">
         {sections.map((s, index) => (
