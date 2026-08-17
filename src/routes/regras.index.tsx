@@ -108,16 +108,38 @@ function RegrasPage() {
       </header>
 
       <main className="mx-auto max-w-4xl px-5 pt-28 pb-24">
-        <h1 className="font-display text-4xl uppercase sm:text-5xl">{cfg["rulesTitle"] || "Regras e Termos"}</h1>
+        <div className="flex justify-center">
+          <img
+            src={logoImg}
+            alt={`Logo ${cfg["siteName"] || "Thug Life RJ"}`}
+            width={160}
+            height={160}
+            className="h-32 w-32 rounded-xl object-cover ring-2 ring-primary/50 sm:h-40 sm:w-40"
+          />
+        </div>
+
+        <div className="mt-8 rounded-xl border border-border bg-card/80 p-5 backdrop-blur-md">
+          <label htmlFor="busca" className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+            🔍 Pesquisar nesta categoria
+          </label>
+          <input
+            id="busca"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Digite uma palavra ou termo..."
+            className="mt-3 w-full rounded-md border border-input bg-background/60 px-4 py-3 text-sm outline-none transition-colors focus:border-primary"
+          />
+        </div>
+
+        {cfg["rulesTopHtml"] && <RichContent html={cfg["rulesTopHtml"]} className="mt-8" />}
 
         <div className="mt-8 space-y-8 rounded-2xl border border-border bg-card/70 p-6 shadow-[var(--shadow-glow)] backdrop-blur-md sm:p-8">
-          {cfg["rulesTopHtml"] && <RichContent html={cfg["rulesTopHtml"]} />}
-
-          <Menu title={cfg["termsTitle"] || "Termos e Condições de Uso"} icon="📘">
+          <Menu title={cfg["termsTitle"] || "Termos e Condições de Uso"} icon="📘" defaultOpen={busca.length > 0}>
             {termos.length === 0 ? (
               <p className="text-sm text-muted-foreground">Conteúdo em atualização.</p>
             ) : (
               <div className="space-y-6">
+
                 {termos.map((s) => {
                   const itens = content.rules
                     .filter((r) => r.section_id === s.id)
