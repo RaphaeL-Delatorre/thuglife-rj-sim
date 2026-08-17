@@ -13,13 +13,13 @@ export const Route = createFileRoute("/regras/")({
   component: RegrasPage,
   head: () => ({
     meta: [
-      { title: "Regras e Termos — Thug Life RJ" },
+      { title: "Regras — Thug Life RJ" },
       {
         name: "description",
         content:
           "Termos de uso, categorias de regras e ações disponíveis no servidor Thug Life RJ (FiveM). Leia antes de conectar na cidade.",
       },
-      { property: "og:title", content: "Regras e Termos — Thug Life RJ" },
+      { property: "og:title", content: "Regras — Thug Life RJ" },
       {
         property: "og:description",
         content: "Tudo que você precisa saber para jogar dentro das regras na Thug Life RJ.",

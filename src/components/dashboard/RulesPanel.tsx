@@ -51,11 +51,6 @@ type Draft = { kind: "section" | "rule"; id: string | null; values: RecordValues
 
 const TEXT_BLOCKS: { key: string; label: string; hint: string }[] = [
   { key: "rulesTopHtml", label: "Texto do início da página", hint: "Aparece no topo, antes dos menus." },
-  {
-    key: "actionsIntroHtml",
-    label: "Texto das Ações Disponíveis",
-    hint: "Aparece acima da lista de ações.",
-  },
   { key: "rulesBottomHtml", label: "Texto do final da página", hint: "Aparece depois das ações." },
 ];
 
@@ -133,7 +128,7 @@ export function RulesPanel({
     <div className="space-y-10">
       <PanelHeader
         title="Página de regras"
-        description="Aqui você controla apenas a página /regras: os textos do início e do fim, o menu Termos e Condições de Uso e o texto das ações."
+        description="Aqui você controla apenas a página /regras: os textos do início e do fim e o menu Termos e Condições de Uso."
         action={
           can("site.edit") ? (
             <Button onClick={saveTexts} disabled={savingTexts}>
