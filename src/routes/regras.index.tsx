@@ -215,8 +215,9 @@ function RegrasPage() {
                     <h3 className="text-sm font-bold uppercase tracking-wide text-primary">{porte}</h3>
                   )}
                   {content.actions
-                    .filter((a) => (a.porte ?? "") === porte)
+                    .filter((a) => (a.porte ?? "") === porte && match(a.nome, a.porte))
                     .map((a) => (
+
                       <Menu key={a.id} title={a.nome} icon={a.icon ?? ""}>
                         {a.html?.trim() ? (
                           <RichContent html={a.html} />
