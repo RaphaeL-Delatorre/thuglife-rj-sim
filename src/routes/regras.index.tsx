@@ -207,7 +207,7 @@ function RegrasPage() {
           <section className="rounded-xl border border-border/70 bg-background/50 p-5">
             <h2 className="font-display text-lg uppercase tracking-wide">🎯 Ações Disponíveis no Servidor</h2>
             <div className="mt-2 h-px w-full bg-primary/60" />
-            {cfg["actionsIntroHtml"] && <RichContent html={cfg["actionsIntroHtml"]} className="mt-3" />}
+
             <div className="mt-4 space-y-6">
               {portes.map((porte) => (
                 <div key={porte} className="space-y-3">
