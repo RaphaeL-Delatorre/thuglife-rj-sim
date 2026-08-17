@@ -242,10 +242,11 @@ function RegrasPage() {
               )}
             </div>
           </section>
-
-          {cfg["rulesBottomHtml"] && <RichContent html={cfg["rulesBottomHtml"]} />}
         </div>
+
+        {cfg["rulesBottomHtml"] && <RichContent html={cfg["rulesBottomHtml"]} className="mt-8" />}
       </main>
+
     </div>
   );
 }
