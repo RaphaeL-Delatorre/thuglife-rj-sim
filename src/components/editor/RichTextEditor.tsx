@@ -1,84 +1,37 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Toolbar } from "./Toolbar";
+import { InspectorPanel } from "./InspectorPanel";
+import { QuickSlashMenu } from "./QuickSlashMenu";
+import { SearchReplaceDialog } from "./SearchReplaceDialog";
+import { ExportImportDialog } from "./ExportImportDialog";
+import { CustomComponentsManager } from "./CustomComponentsManager";
+import { RichContent } from "./RichContent";
+import type {
+  EditorViewMode,
+  PreviewDevice,
+  SelectionFormatState,
+} from "./editor-types";
+import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-
-/* ── Presets ─────────────────────────────────────────────────────────── */
-
-const FONTS = [
-  { label: "Padrão do site", value: "" },
-  { label: "Barlow", value: "Barlow, system-ui, sans-serif" },
-  { label: "Anton (títulos)", value: "Anton, Arial Black, sans-serif" },
-  { label: "Arial", value: "Arial, Helvetica, sans-serif" },
-  { label: "Georgia", value: "Georgia, serif" },
-  { label: "Times New Roman", value: "'Times New Roman', serif" },
-  { label: "Courier New", value: "'Courier New', monospace" },
-  { label: "Verdana", value: "Verdana, sans-serif" },
-  { label: "Trebuchet MS", value: "'Trebuchet MS', sans-serif" },
-  { label: "Impact", value: "Impact, sans-serif" },
-];
-
-const SIZES = ["12px", "14px", "16px", "18px", "20px", "24px", "28px", "32px", "40px", "48px"];
-
-const BLOCKS = [
-  { label: "Parágrafo", value: "p" },
-  { label: "Título 1", value: "h1" },
-  { label: "Título 2", value: "h2" },
-  { label: "Título 3", value: "h3" },
-  { label: "Título 4", value: "h4" },
-  { label: "Código", value: "pre" },
-];
-
-const LINE_HEIGHTS = ["1", "1.25", "1.5", "1.75", "2", "2.5"];
-const PARAGRAPH_SPACING = ["0px", "4px", "8px", "12px", "16px", "24px", "32px"];
-
-const COLORS = [
-  "#ffffff", "#e5e5e5", "#a1a1aa", "#71717a", "#000000",
-  "#ef4444", "#dc2626", "#b91c1c", "#f97316", "#f59e0b",
-  "#eab308", "#22c55e", "#10b981", "#06b6d4", "#3b82f6",
-  "#6366f1", "#8b5cf6", "#d946ef", "#ec4899", "#f43f5e",
-];
-
-const EMOJIS = [
-  "🔴","⚠️","🚨","✅","☑️","❌","⛔","🚫","📌","📍","🔗","🔍","🎯","💥","🔥","⭐","✨","💎","🏆","🎖️",
-  "👮","🚓","🚔","🚑","🏥","🔫","💰","💵","💳","🕵️","🧨","🥊","🚗","🏍️","🛥️","✈️","🏠","🏢","🏦","⏰",
-  "⏳","📅","📖","📝","📢","💬","🗣️","🤝","🙏","👊","👍","👎","🧠","💀","☠️","🩸","🎭","🎮","🎧","🎬",
-];
-
-const BULLETS = [
-  "•","·","⊛","◉","○","◌","◍","◎","●","◘","◦","☉","⁃","⁌","⁍","◆","◇","◈","★","☆",
-  "■","□","☐","☑","☒","✓","✔","❥","❧","☙","☸","✤","✱","✲","↠","↣","↦","↬","⇛","⇝",
-  "⇢","⇨","➙","➛","➜","➝","➞","➟","➠","➡","➢","➣","➤","➥","➦","➧","➨","➮","➱","➲",
-  "➳","➵","➸","➼","➽","➾","→","⇾","⇒","‣","▶","▷","▸","▹","►","▻",
-];
-
-const ALIGNMENTS = [
-  { label: "Alinhar à esquerda", value: "justifyLeft" },
-  { label: "Alinhar no centro", value: "justifyCenter" },
-  { label: "Alinhar à direita", value: "justifyRight" },
-  { label: "Justificar", value: "justifyFull" },
-  { label: "Aumentar recuo", value: "indent" },
-  { label: "Diminuir recuo", value: "outdent" },
-];
-
-
-/* ── Helpers ─────────────────────────────────────────────────────────── */
-
-type SelectionState = {
-  bold: boolean;
-  italic: boolean;
-  underline: boolean;
-  strike: boolean;
-  ul: boolean;
-  ol: boolean;
-  left: boolean;
-  center: boolean;
-  right: boolean;
-  justify: boolean;
-};
-
-const EMPTY_STATE: SelectionState = {
-  bold: false, italic: false, underline: false, strike: false,
-  ul: false, ol: false, left: false, center: false, right: false, justify: false,
+const EMPTY_SELECTION_STATE: SelectionFormatState = {
+  bold: false,
+  italic: false,
+  underline: false,
+  strike: false,
+  subscript: false,
+  superscript: false,
+  code: false,
+  fontFamily: "",
+  fontSize: "",
+  color: "#ffffff",
+  backgroundColor: "transparent",
+  glow: { enabled: false, color: "#8b5cf6", blur: 10, spread: 0, opacity: 1, layers: 1 },
+  stroke: { enabled: false, width: 1, color: "#ffffff", style: "solid" },
+  shadow: { enabled: false, x: 0, y: 0, blur: 0, color: "rgba(0,0,0,0)", opacity: 1 },
+  gradient: { enabled: false, type: "linear", angle: 135, from: "#8b5cf6", to: "#ec4899" },
+  alignment: "left",
+  bulletList: false,
+  numberedList: false,
 };
 
 function youtubeEmbed(url: string) {
@@ -87,300 +40,76 @@ function youtubeEmbed(url: string) {
   return url;
 }
 
-/* ── Toolbar primitives ──────────────────────────────────────────────── */
-
-function TB({
-  onClick,
-  title,
-  active,
-  children,
-}: {
-  onClick: () => void;
-  title: string;
-  active?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      title={title}
-      aria-label={title}
-      onMouseDown={(e) => e.preventDefault()}
-      onClick={onClick}
-      className={`flex h-8 min-w-8 items-center justify-center gap-1 rounded px-2 text-xs font-semibold transition-colors ${
-        active
-          ? "bg-primary text-primary-foreground"
-          : "text-foreground/80 hover:bg-secondary hover:text-foreground"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function TBSelect({
-  value,
-  onChange,
-  options,
-  title,
-  width = "9rem",
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  options: { label: string; value: string }[];
-  title: string;
-  width?: string;
-}) {
-  return (
-    <select
-      title={title}
-      aria-label={title}
-      value={value}
-      onMouseDown={(e) => e.stopPropagation()}
-      onChange={(e) => onChange(e.target.value)}
-      style={{ width }}
-      className="h-8 rounded border border-border bg-background px-2 text-xs text-foreground outline-none focus:border-primary"
-    >
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
-  );
-}
-
-function Divider() {
-  return <span className="mx-1 h-6 w-px bg-border" />;
-}
-
-function ColorMenu({
-  label,
-  title,
-  onPick,
-}: {
-  label: React.ReactNode;
-  title: string;
-  onPick: (color: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <span className="relative">
-      <TB title={title} onClick={() => setOpen((o) => !o)}>
-        {label}
-      </TB>
-      {open && (
-        <div className="absolute left-0 top-9 z-50 w-[13rem] rounded-lg border border-border bg-popover p-2 shadow-xl">
-          <div className="grid grid-cols-5 gap-1">
-            {COLORS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                title={c}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => {
-                  onPick(c);
-                  setOpen(false);
-                }}
-                className="h-7 w-7 rounded border border-border"
-                style={{ background: c }}
-              />
-            ))}
-          </div>
-          <input
-            type="color"
-            aria-label="Cor personalizada"
-            className="mt-2 h-8 w-full cursor-pointer rounded border border-border bg-background"
-            onChange={(e) => {
-              onPick(e.target.value);
-              setOpen(false);
-            }}
-          />
-        </div>
-      )}
-    </span>
-  );
-}
-
-/** Menu com duas cores: preenchimento e traçado (borda). */
-function FillStrokeMenu({
-  label,
-  title,
-  defaultFill,
-  defaultStroke,
-  onApply,
-}: {
-  label: React.ReactNode;
-  title: string;
-  defaultFill: string;
-  defaultStroke: string;
-  onApply: (fill: string, stroke: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [fill, setFill] = useState(defaultFill);
-  const [stroke, setStroke] = useState(defaultStroke);
-
-  const row = (current: string, set: (v: string) => void) => (
-    <div className="mt-1 grid grid-cols-10 gap-1">
-      {COLORS.map((c) => (
-        <button
-          key={c}
-          type="button"
-          title={c}
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => set(c)}
-          className={`h-5 w-5 rounded border ${current === c ? "border-primary ring-1 ring-primary" : "border-border"}`}
-          style={{ background: c }}
-        />
-      ))}
-    </div>
-  );
-
-  return (
-    <span className="relative">
-      <TB title={title} onClick={() => setOpen((o) => !o)}>
-        {label}
-      </TB>
-      {open && (
-        <div className="absolute left-0 top-9 z-50 w-[16rem] rounded-lg border border-border bg-popover p-3 shadow-xl">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-            Cor do preenchimento
-          </p>
-          {row(fill, setFill)}
-          <div className="mt-2 flex items-center gap-2">
-            <input
-              type="color"
-              aria-label="Preenchimento personalizado"
-              value={fill}
-              onChange={(e) => setFill(e.target.value)}
-              className="h-7 w-16 cursor-pointer rounded border border-border bg-background"
-            />
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => setFill("transparent")}
-              className="rounded border border-border px-2 py-1 text-[11px] hover:bg-secondary"
-            >
-              Sem preenchimento
-            </button>
-          </div>
-
-          <p className="mt-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-            Cor do traçado (borda)
-          </p>
-          {row(stroke, setStroke)}
-          <div className="mt-2 flex items-center gap-2">
-            <input
-              type="color"
-              aria-label="Traçado personalizado"
-              value={stroke}
-              onChange={(e) => setStroke(e.target.value)}
-              className="h-7 w-16 cursor-pointer rounded border border-border bg-background"
-            />
-            <button
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => setStroke("transparent")}
-              className="rounded border border-border px-2 py-1 text-[11px] hover:bg-secondary"
-            >
-              Sem traçado
-            </button>
-          </div>
-
-          <div
-            className="mt-3 rounded-xl border px-3 py-2 text-xs"
-            style={{ background: fill, borderColor: stroke }}
-          >
-            Pré-visualização da moldura
-          </div>
-
-          <Button
-            type="button"
-            size="sm"
-            className="mt-3 w-full"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => {
-              onApply(fill, stroke);
-              setOpen(false);
-            }}
-          >
-            Aplicar
-          </Button>
-        </div>
-      )}
-    </span>
-  );
-}
-
-function BulletMenu({ onPick }: { onPick: (char: string) => void }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <span className="relative">
-      <TB title="Marcador da lista" onClick={() => setOpen((o) => !o)}>
-        ◉—
-      </TB>
-      {open && (
-        <div className="absolute left-0 top-9 z-50 grid max-h-[15rem] w-[17rem] grid-cols-10 gap-1 overflow-y-auto rounded-lg border border-border bg-popover p-2 shadow-xl">
-          {BULLETS.map((b, i) => (
-            <button
-              key={`${b}-${i}`}
-              type="button"
-              title={`Marcador ${b}`}
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => {
-                onPick(b);
-                setOpen(false);
-              }}
-              className="rounded p-1 text-sm hover:bg-secondary"
-            >
-              {b}
-            </button>
-          ))}
-        </div>
-      )}
-    </span>
-  );
-}
-
-
-
-/* ── Editor ──────────────────────────────────────────────────────────── */
-
 export function RichTextEditor({
   value,
   onChange,
-  minHeight = 380,
+  minHeight = 420,
 }: {
   value: string;
   onChange: (html: string) => void;
   minHeight?: number;
 }) {
-  const ref = useRef<HTMLDivElement | null>(null);
+  const editorRef = useRef<HTMLDivElement | null>(null);
   const savedRange = useRef<Range | null>(null);
-  const [state, setState] = useState<SelectionState>(EMPTY_STATE);
-  const [source, setSource] = useState(false);
-  const [emojiOpen, setEmojiOpen] = useState(false);
 
+  // States
+  const [viewMode, setViewMode] = useState<EditorViewMode>("visual");
+  const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("desktop");
+  const [inspectorOpen, setInspectorOpen] = useState(false);
+  const [selectionState, setSelectionState] = useState<SelectionFormatState>(EMPTY_SELECTION_STATE);
+  const [copiedStyles, setCopiedStyles] = useState<Record<string, string> | null>(null);
+  const [saveStatus, setSaveStatus] = useState<"saved" | "saving">("saved");
+  const [lastSavedTime, setLastSavedTime] = useState<string>("");
+
+  // Modals & Popups
+  const [slashMenuOpen, setSlashMenuOpen] = useState(false);
+  const [slashFilter, setSlashFilter] = useState("");
+  const [slashPos, setSlashPos] = useState({ top: 0, left: 0 });
+
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [customComponentsOpen, setCustomComponentsOpen] = useState(false);
+
+  // Context Menu
+  const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
+  const [targetContextNode, setTargetContextNode] = useState<HTMLElement | null>(null);
+
+  // Sync internal editor content with incoming value
   useEffect(() => {
-    const el = ref.current;
+    const el = editorRef.current;
     if (!el) return;
-    if (el.innerHTML !== value) el.innerHTML = value || "";
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [source]);
+    if (el.innerHTML !== value) {
+      el.innerHTML = value || "";
+    }
+  }, [value, viewMode]);
 
+  // Emit changes to parent
   const emit = useCallback(() => {
-    if (ref.current) onChange(ref.current.innerHTML);
+    if (editorRef.current) {
+      setSaveStatus("saving");
+      const currentHtml = editorRef.current.innerHTML;
+      onChange(currentHtml);
+      setTimeout(() => {
+        setSaveStatus("saved");
+        const now = new Date();
+        setLastSavedTime(
+          `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`
+        );
+      }, 300);
+    }
   }, [onChange]);
 
+  // Selection range helpers
   const saveRange = useCallback(() => {
     const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0 && ref.current?.contains(sel.anchorNode)) {
+    if (sel && sel.rangeCount > 0 && editorRef.current?.contains(sel.anchorNode)) {
       savedRange.current = sel.getRangeAt(0).cloneRange();
     }
   }, []);
 
-  const focusEditor = useCallback(() => {
-    const el = ref.current;
+  const restoreRange = useCallback(() => {
+    const el = editorRef.current;
     if (!el) return;
     el.focus();
     const sel = window.getSelection();
@@ -391,7 +120,7 @@ export function RichTextEditor({
     }
   }, []);
 
-  const refreshState = useCallback(() => {
+  const refreshSelectionState = useCallback(() => {
     if (typeof document === "undefined") return;
     const q = (c: string) => {
       try {
@@ -400,23 +129,20 @@ export function RichTextEditor({
         return false;
       }
     };
-    setState({
+    setSelectionState((prev) => ({
+      ...prev,
       bold: q("bold"),
       italic: q("italic"),
       underline: q("underline"),
       strike: q("strikeThrough"),
-      ul: q("insertUnorderedList"),
-      ol: q("insertOrderedList"),
-      left: q("justifyLeft"),
-      center: q("justifyCenter"),
-      right: q("justifyRight"),
-      justify: q("justifyFull"),
-    });
+      bulletList: q("insertUnorderedList"),
+      numberedList: q("insertOrderedList"),
+    }));
   }, []);
 
   const exec = useCallback(
     (command: string, argument?: string) => {
-      focusEditor();
+      restoreRange();
       try {
         document.execCommand("styleWithCSS", false, "true");
       } catch {
@@ -424,20 +150,20 @@ export function RichTextEditor({
       }
       document.execCommand(command, false, argument);
       emit();
-      refreshState();
+      refreshSelectionState();
       saveRange();
     },
-    [emit, focusEditor, refreshState, saveRange],
+    [emit, restoreRange, refreshSelectionState, saveRange]
   );
 
   const insertHTML = useCallback(
     (html: string) => {
-      focusEditor();
+      restoreRange();
       document.execCommand("insertHTML", false, html);
       emit();
       saveRange();
     },
-    [emit, focusEditor, saveRange],
+    [emit, restoreRange, saveRange]
   );
 
   const selectedHTML = useCallback(() => {
@@ -448,391 +174,842 @@ export function RichTextEditor({
     return div.innerHTML;
   }, []);
 
-  /** Wrap the current selection (or a placeholder) in custom markup. */
   const wrapSelection = useCallback(
-    (open: string, close: string, placeholder: string) => {
+    (openTag: string, closeTag: string, placeholder: string) => {
       const inner = selectedHTML() || placeholder;
-      insertHTML(`${open}${inner}${close}`);
+      insertHTML(`${openTag}${inner}${closeTag}`);
     },
-    [insertHTML, selectedHTML],
+    [insertHTML, selectedHTML]
   );
 
-  const applyBlockStyle = useCallback(
-    (prop: string, val: string) => {
-      focusEditor();
+  const applyStyleToTarget = useCallback(
+    (property: string, value: string) => {
+      restoreRange();
       const sel = window.getSelection();
       if (!sel || sel.rangeCount === 0) return;
+
+      if (!sel.isCollapsed) {
+        // Apply inline style on selection
+        const inner = selectedHTML() || "texto";
+        insertHTML(`<span style="${property}:${value}">${inner}</span>`);
+        return;
+      }
+
+      // Apply on nearest block container
       let node: Node | null = sel.getRangeAt(0).startContainer;
-      while (node && node !== ref.current) {
+      while (node && node !== editorRef.current) {
         if (node.nodeType === 1) {
           const el = node as HTMLElement;
-          const display = window.getComputedStyle(el).display;
-          if (display !== "inline") {
-            el.style.setProperty(prop, val);
-            emit();
-            return;
-          }
+          el.style.setProperty(property, value);
+          emit();
+          return;
         }
         node = node.parentNode;
       }
-      if (ref.current) {
-        ref.current.style.setProperty(prop, val);
+      if (editorRef.current) {
+        editorRef.current.style.setProperty(property, value);
         emit();
       }
     },
-    [emit, focusEditor],
+    [emit, insertHTML, restoreRange, selectedHTML]
   );
 
-  const promptInsert = {
-    link: () => {
-      const url = window.prompt("Endereço do link (https://...)");
-      if (!url) return;
-      const label = selectedHTML();
-      if (label) exec("createLink", url);
-      else
-        insertHTML(
-          `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>&nbsp;`,
-        );
-    },
-    image: () => {
-      const url = window.prompt("URL da imagem (https://...)");
-      if (!url) return;
-      const alt = window.prompt("Texto alternativo (descrição da imagem)") ?? "";
-      insertHTML(`<figure class="rc-figure"><img src="${url}" alt="${alt}" loading="lazy" /></figure><p><br></p>`);
-    },
-    video: () => {
-      const url = window.prompt("URL do vídeo (YouTube ou MP4)");
-      if (!url) return;
-      const src = youtubeEmbed(url);
-      const html = /\.mp4($|\?)/i.test(url)
-        ? `<figure class="rc-video"><video src="${url}" controls playsinline></video></figure>`
-        : `<figure class="rc-video"><iframe src="${src}" title="Vídeo" allowfullscreen loading="lazy" frameborder="0"></iframe></figure>`;
-      insertHTML(`${html}<p><br></p>`);
-    },
-    table: () => {
-      const cols = Number(window.prompt("Quantas colunas?", "2") ?? 2);
-      const rowsN = Number(window.prompt("Quantas linhas (sem contar o cabeçalho)?", "2") ?? 2);
-      if (!cols || !rowsN) return;
-      const head = `<tr>${Array.from({ length: cols }, (_, i) => `<th>Coluna ${i + 1}</th>`).join("")}</tr>`;
-      const body = Array.from(
-        { length: rowsN },
-        () => `<tr>${Array.from({ length: cols }, () => "<td>&nbsp;</td>").join("")}</tr>`,
-      ).join("");
-      insertHTML(
-        `<div class="rc-table-wrap"><table class="rc-table"><thead>${head}</thead><tbody>${body}</tbody></table></div><p><br></p>`,
-      );
-    },
-    comment: () => {
-      const author = window.prompt("Autor do comentário", "Equipe") ?? "Equipe";
-      wrapSelection(
-        `<aside class="rc-comment"><span class="rc-comment-author">💬 ${author}</span><div>`,
-        `</div></aside><p><br></p>`,
-        "Escreva o comentário aqui.",
-      );
-    },
-    spoiler: () => {
-      const label = window.prompt("Título do spoiler", "Clique para revelar") ?? "Spoiler";
-      wrapSelection(
-        `<details class="rc-spoiler"><summary>${label}</summary><div class="rc-spoiler-body">`,
-        `</div></details><p><br></p>`,
-        "Conteúdo oculto.",
-      );
-    },
-  };
+  const applyBatchStyles = useCallback(
+    (styles: Record<string, string>) => {
+      restoreRange();
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
 
-  const frame = (fill: string, stroke: string) =>
-    wrapSelection(
-      `<div class="rc-frame" style="border:1px solid ${stroke};border-radius:0.9rem;background:${fill}"><div>`,
-      `</div></div><p><br></p>`,
-      "Conteúdo em moldura.",
-    );
+      const styleString = Object.entries(styles)
+        .map(([k, v]) => `${k}:${v}`)
+        .join(";");
 
-  const textHighlight = (fill: string, stroke: string) =>
-    wrapSelection(
-      `<span class="rc-hl" style="background:${fill};border:1px solid ${stroke}">`,
-      `</span>`,
-      "texto destacado",
-    );
-
-  /** Aplica o caractere de marcador na lista onde está o cursor. */
-  const applyBullet = (char: string) => {
-    focusEditor();
-    const sel = window.getSelection();
-    let node: Node | null = sel && sel.rangeCount > 0 ? sel.getRangeAt(0).startContainer : null;
-    let list: HTMLUListElement | null = null;
-    while (node && node !== ref.current) {
-      if (node.nodeType === 1 && (node as HTMLElement).tagName === "UL") {
-        list = node as HTMLUListElement;
-        break;
+      if (!sel.isCollapsed) {
+        const inner = selectedHTML() || "texto formatado";
+        insertHTML(`<span style="${styleString}">${inner}</span>`);
+        return;
       }
-      node = node.parentNode;
-    }
-    if (!list) {
-      insertHTML(
-        `<ul class="rc-bullets" style="--rc-bullet:'${char}'"><li>Primeiro item</li><li>Segundo item</li></ul><p><br></p>`,
-      );
+
+      let node: Node | null = sel.getRangeAt(0).startContainer;
+      while (node && node !== editorRef.current) {
+        if (node.nodeType === 1) {
+          const el = node as HTMLElement;
+          Object.entries(styles).forEach(([k, v]) => el.style.setProperty(k, v));
+          emit();
+          return;
+        }
+        node = node.parentNode;
+      }
+    },
+    [emit, insertHTML, restoreRange, selectedHTML]
+  );
+
+  // Format Painter (Copy Style & Paste Style)
+  const handleCopyStyle = useCallback(() => {
+    saveRange();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) {
+      toast.error("Selecione um elemento ou texto para copiar o estilo.");
       return;
     }
-    list.classList.add("rc-bullets");
-    list.style.setProperty("--rc-bullet", `'${char}'`);
-    emit();
+    let node: Node | null = sel.getRangeAt(0).startContainer;
+    if (node && node.nodeType === 3) node = node.parentNode;
+    if (node && node.nodeType === 1) {
+      const el = node as HTMLElement;
+      const computed = window.getComputedStyle(el);
+      const stylesObj = {
+        color: computed.color,
+        background: computed.background,
+        "font-family": computed.fontFamily,
+        "font-size": computed.fontSize,
+        "font-weight": computed.fontWeight,
+        "letter-spacing": computed.letterSpacing,
+        "line-height": computed.lineHeight,
+        "text-shadow": computed.textShadow,
+        "border-color": computed.borderColor,
+        "border-width": computed.borderWidth,
+        "border-style": computed.borderStyle,
+        "border-radius": computed.borderRadius,
+      };
+      setCopiedStyles(stylesObj);
+      toast.success("Estilo copiado com sucesso! Selecione outro texto e clique no pincel para aplicar.");
+    }
+  }, [saveRange]);
+
+  const handlePasteStyle = useCallback(() => {
+    if (!copiedStyles) {
+      toast.error("Nenhum estilo copiado ainda.");
+      return;
+    }
+    applyBatchStyles(copiedStyles);
+    toast.success("Estilo aplicado com sucesso!");
+    setCopiedStyles(null);
+  }, [copiedStyles, applyBatchStyles]);
+
+  // Insert Rich RP Components
+  const handleInsertComponent = useCallback(
+    (type: string) => {
+      switch (type) {
+        case "rule": {
+          const code = window.prompt("Código da regra (ex.: 1.1)", "1.1") ?? "1.1";
+          const title = window.prompt("Título da regra (ex.: METAGAMING)", "NOME DA REGRA") ?? "REGRA";
+          const status = window.prompt("Status da regra (PROIBIDO, PERMITIDO, OBRIGATÓRIO)", "PROIBIDO") ?? "PROIBIDO";
+          const penalty = window.prompt("Penalidade prevista", "Banimento de 7 a 30 dias.") ?? "";
+
+          const isProibido = status.toUpperCase().includes("PROIB");
+          const color = isProibido ? "#ef4444" : "#22c55e";
+
+          insertHTML(`
+            <div class="rc-rule-card" style="border:1px solid ${color}60;background:${color}10;border-radius:0.85rem;padding:1.2rem;margin:1.2rem 0;box-shadow:0 0 15px ${color}15;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;flex-wrap:wrap;gap:0.5rem;">
+                <span class="rc-rule-code" style="color:${color};font-weight:800;font-size:1.1rem;font-family:var(--font-display);letter-spacing:0.04em;">
+                  ⚖️ ${code} — ${title.toUpperCase()}
+                </span>
+                <span class="rc-badge" style="border:1px solid ${color};background:${color}25;color:${color};font-size:0.75rem;padding:0.15rem 0.6rem;border-radius:0.35rem;font-weight:700;">
+                  ${status.toUpperCase()}
+                </span>
+              </div>
+              <p style="margin:0 0 0.6rem;color:var(--foreground);font-size:0.95rem;line-height:1.65;">
+                Descreva detalhadamente a regra, conduta esperada e exemplos práticos para os jogadores.
+              </p>
+              ${
+                penalty
+                  ? `<div style="border-top:1px solid ${color}35;padding-top:0.6rem;font-size:0.85rem;color:${color};">
+                      <strong>⚖️ Penalidade:</strong> ${penalty}
+                    </div>`
+                  : ""
+              }
+            </div>
+            <p><br></p>
+          `);
+          break;
+        }
+
+        case "penalty": {
+          const title = window.prompt("Título da Penalidade", "BANIMENTO PERMANENTE") ?? "PENALIDADE";
+          const desc = window.prompt("Descrição / Motivos", "Aplicável em casos de uso de trapaças, racismo, preconceito ou condutas graves.") ?? "";
+          insertHTML(`
+            <div class="rc-penalty-card" style="border-left:4px solid #ef4444;background:#ef444414;border-radius:0 0.85rem 0.85rem 0;padding:1.2rem;margin:1.2rem 0;">
+              <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;">
+                <span style="font-size:1.3rem;">🛑</span>
+                <h4 style="color:#ef4444;font-family:var(--font-display);font-size:1.1rem;margin:0;letter-spacing:0.05em;text-transform:uppercase;">
+                  ${title}
+                </h4>
+              </div>
+              <p style="margin:0;color:var(--foreground);font-size:0.92rem;line-height:1.6;">
+                ${desc}
+              </p>
+            </div>
+            <p><br></p>
+          `);
+          break;
+        }
+
+        case "compare": {
+          insertHTML(`
+            <div class="rc-compare-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin:1.5rem 0;">
+              <div style="border:1px solid #22c55e;background:#22c55e12;border-radius:0.85rem;padding:1.1rem;box-shadow:0 0 15px rgba(34,197,94,0.1);">
+                <h4 style="color:#22c55e;font-weight:800;font-size:0.95rem;margin:0 0 0.6rem;display:flex;align-items:center;gap:0.4rem;font-family:var(--font-display);letter-spacing:0.05em;">
+                  <span>✓</span> PERMITIDO
+                </h4>
+                <ul style="list-style:none;padding-left:0;margin:0;font-size:0.88rem;line-height:1.65;color:var(--foreground);">
+                  <li style="margin-bottom:0.4rem;">• Negociação pacífica e exigência de garantias</li>
+                  <li style="margin-bottom:0.4rem;">• Gravação em primeira pessoa de todas as ações</li>
+                  <li>• Uso de veículos táticos conforme as regras de porte</li>
+                </ul>
+              </div>
+              <div style="border:1px solid #ef4444;background:#ef444412;border-radius:0.85rem;padding:1.1rem;box-shadow:0 0 15px rgba(239,68,68,0.1);">
+                <h4 style="color:#ef4444;font-weight:800;font-size:0.95rem;margin:0 0 0.6rem;display:flex;align-items:center;gap:0.4rem;font-family:var(--font-display);letter-spacing:0.05em;">
+                  <span>✕</span> PROIBIDO
+                </h4>
+                <ul style="list-style:none;padding-left:0;margin:0;font-size:0.88rem;line-height:1.65;color:var(--foreground);">
+                  <li style="margin-bottom:0.4rem;">• Disparo sem aviso sonoro ou motivo (RDM)</li>
+                  <li style="margin-bottom:0.4rem;">• Atropelamento proposital de civis (VDM)</li>
+                  <li>• Desconectar ou forçar crash no meio de abordagem</li>
+                </ul>
+              </div>
+            </div>
+            <p><br></p>
+          `);
+          break;
+        }
+
+        case "card-info":
+        case "card-success":
+        case "card-warning":
+        case "card-danger":
+        case "card-critical":
+        case "card-tip": {
+          const map = {
+            "card-info": { color: "#3b82f6", icon: "🔵", title: "INFORMAÇÃO IMPORTANTE" },
+            "card-success": { color: "#22c55e", icon: "🟢", title: "DIRETRIZ APROVADA" },
+            "card-warning": { color: "#f59e0b", icon: "🟡", title: "AVISO / ATENÇÃO" },
+            "card-danger": { color: "#ef4444", icon: "🔴", title: "CONDUTA PROIBIDA" },
+            "card-critical": { color: "#dc2626", icon: "🛑", title: "REGRA CRÍTICA" },
+            "card-tip": { color: "#eab308", icon: "💡", title: "DICA DE ROLEPLAY" },
+          }[type]!;
+
+          insertHTML(`
+            <div class="rc-card-box" style="border:1px solid ${map.color};background:${map.color}15;border-radius:0.85rem;padding:1.2rem;margin:1.2rem 0;box-shadow:0 0 15px ${map.color}20;">
+              <h4 style="color:${map.color};font-family:var(--font-display);font-size:1.1rem;margin:0 0 0.5rem;display:flex;align-items:center;gap:0.5rem;letter-spacing:0.04em;">
+                <span>${map.icon}</span> ${map.title}
+              </h4>
+              <p style="margin:0;color:var(--foreground);font-size:0.92rem;line-height:1.65;">
+                Insira aqui as instruções e orientações referentes a este aviso.
+              </p>
+            </div>
+            <p><br></p>
+          `);
+          break;
+        }
+
+        case "accordion": {
+          insertHTML(`
+            <div class="rc-accordion" style="border:1px solid var(--border);border-radius:0.85rem;overflow:hidden;margin:1.3rem 0;background:rgba(255,255,255,0.03);">
+              <details open style="border-bottom:1px solid var(--border);">
+                <summary style="padding:0.9rem 1.2rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:space-between;color:var(--primary);font-family:var(--font-display);font-size:1rem;letter-spacing:0.04em;text-transform:uppercase;">
+                  <span>▶ 1. Acesso à Cidade e Diretrizes</span>
+                </summary>
+                <div class="rc-accordion-body" style="padding:1rem 1.2rem;border-top:1px solid var(--border);color:var(--foreground);font-size:0.92rem;line-height:1.65;">
+                  Conteúdo detalhado da primeira seção. Você pode incluir listas, regras, imagens e tabelas aqui dentro.
+                </div>
+              </details>
+              <details>
+                <summary style="padding:0.9rem 1.2rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:space-between;color:var(--primary);font-family:var(--font-display);font-size:1rem;letter-spacing:0.04em;text-transform:uppercase;">
+                  <span>▶ 2. Regras de Participação em Ações</span>
+                </summary>
+                <div class="rc-accordion-body" style="padding:1rem 1.2rem;border-top:1px solid var(--border);color:var(--foreground);font-size:0.92rem;line-height:1.65;">
+                  Conteúdo detalhado da segunda seção expansível.
+                </div>
+              </details>
+            </div>
+            <p><br></p>
+          `);
+          break;
+        }
+
+        case "stat-battle": {
+          insertHTML(`
+            <div class="rc-stat-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0;">
+              <div style="border:1px solid #ef4444;background:#ef444415;border-radius:0.85rem;padding:1.2rem;text-align:center;box-shadow:0 0 15px rgba(239,68,68,0.15);">
+                <p style="margin:0 0 0.2rem;color:#ef4444;font-size:0.8rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">💀 Bandidos / Assaltantes</p>
+                <p style="margin:0;color:#ef4444;font-family:var(--font-display);font-size:2.4rem;line-height:1;">10 MÁX</p>
+              </div>
+              <div style="border:1px solid #3b82f6;background:#3b82f615;border-radius:0.85rem;padding:1.2rem;text-align:center;box-shadow:0 0 15px rgba(59,130,246,0.15);">
+                <p style="margin:0 0 0.2rem;color:#3b82f6;font-size:0.8rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">🚔 Polícia / Forças</p>
+                <p style="margin:0;color:#3b82f6;font-family:var(--font-display);font-size:2.4rem;line-height:1;">12 MÁX</p>
+              </div>
+            </div>
+            <p><br></p>
+          `);
+          break;
+        }
+
+        case "stat": {
+          const title = window.prompt("Título do Destaque", "Tempo Máximo de Ação") ?? "Destaque";
+          const val = window.prompt("Valor em Destaque", "60 MINUTOS") ?? "60";
+          const sub = window.prompt("Legenda / Subtítulo", "Contagem a partir do primeiro disparo.") ?? "";
+          insertHTML(`
+            <div class="rc-stat" style="border:1px solid #8b5cf6;background:#8b5cf615;border-radius:0.85rem;margin:1.2rem 0;padding:1.2rem;text-align:center;box-shadow:0 0 20px rgba(139,92,246,0.15);">
+              <p class="rc-stat-title" style="color:var(--foreground);font-size:0.82rem;font-weight:700;letter-spacing:0.12em;margin:0 0 0.4rem;text-transform:uppercase;">${title}</p>
+              <p class="rc-stat-value" style="color:#8b5cf6;font-family:var(--font-display);font-size:2.2rem;margin:0;line-height:1.1;">${val}</p>
+              ${sub ? `<p class="rc-stat-sub" style="font-size:0.85rem;margin:0.4rem 0 0;color:var(--muted-foreground);">${sub}</p>` : ""}
+            </div>
+            <p><br></p>
+          `);
+          break;
+        }
+
+        case "divider-glow": {
+          insertHTML('<div class="rc-divider-glow"></div><p><br></p>');
+          break;
+        }
+
+        case "divider-icon": {
+          const icon = window.prompt("Ícone ou texto central do divisor", "✦") ?? "✦";
+          insertHTML(`
+            <div class="rc-divider" style="display:flex;align-items:center;text-align:center;margin:2rem 0;color:#8b5cf6;font-weight:bold;font-size:1.1rem;">
+              <span style="padding:0 1rem;">${icon}</span>
+            </div>
+            <p><br></p>
+          `);
+          break;
+        }
+
+        case "quote": {
+          const author = window.prompt("Autor da Citação", "Administração Thug Life RJ") ?? "Staff";
+          insertHTML(`
+            <blockquote style="border-left:4px solid #8b5cf6;background:#8b5cf612;border-radius:0 0.8rem 0.8rem 0;margin:1.2rem 0;padding:1rem 1.3rem;font-style:italic;color:var(--foreground);">
+              <p style="margin:0 0 0.4rem;font-size:0.95rem;line-height:1.6;">
+                &ldquo;O bom senso e a valorização da vida são as chaves de ouro para um roleplay imersivo e justo.&rdquo;
+              </p>
+              <footer style="font-size:0.8rem;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:0.05em;">
+                — ${author}
+              </footer>
+            </blockquote>
+            <p><br></p>
+          `);
+          break;
+        }
+
+        case "badge": {
+          const text = window.prompt("Texto da Etiqueta / Badge", "IMPORTANTE") ?? "TAG";
+          const color = window.prompt("Cor (HEX ex: #8b5cf6, #ef4444, #22c55e)", "#8b5cf6") ?? "#8b5cf6";
+          wrapSelection(
+            `<span class="rc-badge" style="border:1px solid ${color};background:${color}22;color:${color};font-size:0.75rem;padding:0.1rem 0.5rem;border-radius:0.35rem;font-weight:700;margin:0 0.2rem;">`,
+            `</span>`,
+            text
+          );
+          break;
+        }
+
+        case "table": {
+          const cols = Number(window.prompt("Quantas colunas?", "2") ?? 2);
+          const rows = Number(window.prompt("Quantas linhas?", "3") ?? 3);
+          if (!cols || !rows) return;
+          const head = `<tr>${Array.from({ length: cols }, (_, i) => `<th style="border:1px solid var(--border);padding:0.7rem 1rem;background:#8b5cf620;color:var(--foreground);font-weight:700;text-transform:uppercase;font-size:0.8rem;letter-spacing:0.05em;">Coluna ${i + 1}</th>`).join("")}</tr>`;
+          const body = Array.from(
+            { length: rows },
+            () =>
+              `<tr>${Array.from({ length: cols }, () => `<td style="border:1px solid var(--border);padding:0.6rem 1rem;font-size:0.9rem;">Conteúdo</td>`).join("")}</tr>`
+          ).join("");
+          insertHTML(
+            `<div class="rc-table-wrap" style="overflow-x:auto;margin:1.2rem 0;"><table class="rc-table" style="width:100%;border-collapse:collapse;"><thead>${head}</thead><tbody>${body}</tbody></table></div><p><br></p>`
+          );
+          break;
+        }
+
+        case "checklist": {
+          insertHTML(`
+            <ul class="rc-checklist" style="list-style:none;margin-left:0;padding-left:0;">
+              <li>Primeira diretriz obrigatória</li>
+              <li>Segunda diretriz obrigatória</li>
+              <li>Terceira diretriz obrigatória</li>
+            </ul>
+            <p><br></p>
+          `);
+          break;
+        }
+
+        case "image": {
+          const url = window.prompt("URL da imagem (https://...)");
+          if (!url) return;
+          const alt = window.prompt("Descrição / Texto alternativo da imagem", "") ?? "";
+          insertHTML(`
+            <figure class="rc-figure" style="margin:1.2rem 0;text-align:center;">
+              <img src="${url}" alt="${alt}" loading="lazy" style="max-width:100%;border-radius:0.85rem;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,0.5);display:inline-block;" />
+              ${alt ? `<figcaption style="margin-top:0.4rem;font-size:0.8rem;color:var(--muted-foreground);font-style:italic;">${alt}</figcaption>` : ""}
+            </figure>
+            <p><br></p>
+          `);
+          break;
+        }
+
+        case "video": {
+          const url = window.prompt("URL do vídeo (YouTube ou MP4)");
+          if (!url) return;
+          const src = youtubeEmbed(url);
+          const html = /\.mp4($|\?)/i.test(url)
+            ? `<figure class="rc-video"><video src="${url}" controls playsinline style="border-radius:0.85rem;border:1px solid var(--border);width:100%;aspect-ratio:16/9;"></video></figure>`
+            : `<figure class="rc-video"><iframe src="${src}" title="Vídeo" allowfullscreen loading="lazy" frameborder="0" style="border-radius:0.85rem;border:1px solid var(--border);width:100%;aspect-ratio:16/9;"></iframe></figure>`;
+          insertHTML(`${html}<p><br></p>`);
+          break;
+        }
+
+        case "link": {
+          const url = window.prompt("Endereço do Link (https://...)");
+          if (!url) return;
+          const sel = selectedHTML();
+          if (sel) {
+            exec("createLink", url);
+          } else {
+            insertHTML(`<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--primary);text-decoration:underline;">${url}</a>&nbsp;`);
+          }
+          break;
+        }
+
+        case "pagebreak": {
+          insertHTML('<div class="rc-pagebreak"></div><p><br></p>');
+          break;
+        }
+
+        case "code-inline": {
+          wrapSelection(
+            '<code style="background:rgba(255,255,255,0.1);padding:0.15rem 0.4rem;border-radius:0.3rem;font-family:monospace;font-size:0.85em;color:var(--primary);">',
+            "</code>",
+            "código"
+          );
+          break;
+        }
+
+        default:
+          break;
+      }
+    },
+    [exec, insertHTML, selectedHTML, wrapSelection]
+  );
+
+  // Search & Replace Handlers
+  const handleSearch = useCallback((query: string, matchCase: boolean): number => {
+    if (!editorRef.current || !query) return 0;
+    const text = editorRef.current.innerText || "";
+    const regex = new RegExp(query, matchCase ? "g" : "gi");
+    const matches = text.match(regex);
+    return matches ? matches.length : 0;
+  }, []);
+
+  const handleNextSearch = useCallback(() => {
+    // Uses window.find if available
+    if (typeof window !== "undefined" && "find" in window) {
+      // @ts-expect-error find standard web api
+      window.find();
+    }
+  }, []);
+
+  const handlePrevSearch = useCallback(() => {
+    if (typeof window !== "undefined" && "find" in window) {
+      // @ts-expect-error find standard web api
+      window.find(undefined, undefined, true);
+    }
+  }, []);
+
+  const handleReplace = useCallback(
+    (query: string, replaceWith: string, matchCase: boolean): boolean => {
+      if (!editorRef.current || !query) return false;
+      const html = editorRef.current.innerHTML;
+      const regex = new RegExp(query, matchCase ? "" : "i");
+      if (regex.test(html)) {
+        editorRef.current.innerHTML = html.replace(regex, replaceWith);
+        emit();
+        return true;
+      }
+      return false;
+    },
+    [emit]
+  );
+
+  const handleReplaceAll = useCallback(
+    (query: string, replaceWith: string, matchCase: boolean): number => {
+      if (!editorRef.current || !query) return 0;
+      const html = editorRef.current.innerHTML;
+      const regex = new RegExp(query, matchCase ? "g" : "gi");
+      const matches = html.match(regex);
+      const count = matches ? matches.length : 0;
+      if (count > 0) {
+        editorRef.current.innerHTML = html.replace(regex, replaceWith);
+        emit();
+      }
+      return count;
+    },
+    [emit]
+  );
+
+  // Key Down & Shortcuts handling
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // Shortcut Ctrl+F
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") {
+      e.preventDefault();
+      setSearchOpen(true);
+      return;
+    }
+
+    // Slash command detection
+    if (e.key === "/") {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        const rect = sel.getRangeAt(0).getBoundingClientRect();
+        setSlashPos({
+          top: rect.bottom + window.scrollY + 6,
+          left: rect.left + window.scrollX,
+        });
+        setSlashFilter("");
+        setSlashMenuOpen(true);
+      }
+    }
   };
 
+  const handleKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    saveRange();
+    refreshSelectionState();
 
-  const calloutFrame = (color: string) => {
-    const title = window.prompt("Título do aviso", "AVISO CRÍTICO") ?? "AVISO";
-    wrapSelection(
-      `<div class="rc-callout" style="border-color:${color};background:${color}1f"><p class="rc-callout-title" style="color:${color}">⚠️ ${title}</p><div>`,
-      `</div></div><p><br></p>`,
-      "Texto do aviso.",
-    );
+    if (slashMenuOpen) {
+      if (e.key === "Escape") {
+        setSlashMenuOpen(false);
+      }
+    }
   };
 
-  const glow = (color: string) =>
-    wrapSelection(
-      `<span class="rc-glow" style="color:${color};text-shadow:0 0 10px ${color},0 0 26px ${color}88">`,
-      `</span>`,
-      "texto com brilho",
-    );
-
-  const badge = (color: string) =>
-    wrapSelection(
-      `<span class="rc-badge" style="border-color:${color};background:${color}26;color:${color}">`,
-      `</span>`,
-      "texto com moldura",
-    );
-
-  const checklist = () =>
-    insertHTML(
-      `<ul class="rc-checklist"><li>Primeiro item</li><li>Segundo item</li><li>Terceiro item</li></ul><p><br></p>`,
-    );
-
-  const stat = () => {
-    const title = window.prompt("Título do destaque", "Tempo Máximo") ?? "Destaque";
-    const val = window.prompt("Valor em destaque", "60 SEGUNDOS") ?? "";
-    const sub = window.prompt("Legenda (opcional)", "") ?? "";
-    insertHTML(
-      `<div class="rc-stat"><p class="rc-stat-title">${title}</p><p class="rc-stat-value">${val}</p>${
-        sub ? `<p class="rc-stat-sub">${sub}</p>` : ""
-      }</div><p><br></p>`,
-    );
+  // Context Menu
+  const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    saveRange();
+    setContextMenuPos({ x: e.clientX, y: e.clientY });
+    setTargetContextNode(e.target as HTMLElement);
   };
 
-  const ruleItem = () => {
-    const code = window.prompt("Código da regra (ex.: 2.1)", "") ?? "";
-    wrapSelection(
-      `<p class="rc-rule"><span class="rc-rule-code">${code}</span> – `,
-      `</p>`,
-      "Descreva a regra aqui.",
-    );
+  const closeContextMenu = () => {
+    setContextMenuPos(null);
+    setTargetContextNode(null);
   };
 
-  const fontSize = (size: string) => {
-    if (!size) return;
-    wrapSelection(`<span style="font-size:${size}">`, `</span>`, "texto");
+  // Outline Jump
+  const handleJumpToOutline = (text: string) => {
+    if (!editorRef.current) return;
+    const elements = Array.from(editorRef.current.querySelectorAll("*"));
+    const target = elements.find((el) => el.textContent?.includes(text));
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      (target as HTMLElement).style.outline = "2px solid #8b5cf6";
+      setTimeout(() => {
+        (target as HTMLElement).style.outline = "none";
+      }, 1500);
+    }
   };
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-background/60">
-      <div
-        className="flex flex-wrap items-center gap-1 border-b border-border bg-secondary/40 p-2"
-        onMouseDown={() => saveRange()}
-      >
-        <TB title="Desfazer" onClick={() => exec("undo")}>↶</TB>
-        <TB title="Refazer" onClick={() => exec("redo")}>↷</TB>
-        <Divider />
-        <TB title="Negrito" active={state.bold} onClick={() => exec("bold")}>
-          <strong>B</strong>
-        </TB>
-        <TB title="Itálico" active={state.italic} onClick={() => exec("italic")}>
-          <em>I</em>
-        </TB>
-        <TB title="Sublinhado" active={state.underline} onClick={() => exec("underline")}>
-          <span className="underline">U</span>
-        </TB>
-        <TB title="Traçado" active={state.strike} onClick={() => exec("strikeThrough")}>
-          <span className="line-through">S</span>
-        </TB>
-        <TB title="Limpar formatação" onClick={() => exec("removeFormat")}>Tx</TB>
-        <Divider />
-        <TBSelect
-          title="Fonte"
-          value=""
-          width="8.5rem"
-          options={[{ label: "Fonte", value: "" }, ...FONTS.slice(1)]}
-          onChange={(v) => v && exec("fontName", v)}
-        />
-        <TBSelect
-          title="Tamanho da letra"
-          value=""
-          width="6rem"
-          options={[{ label: "Tamanho", value: "" }, ...SIZES.map((s) => ({ label: s, value: s }))]}
-          onChange={fontSize}
-        />
-        <TBSelect
-          title="Formatação do bloco"
-          value=""
-          width="7.5rem"
-          options={[{ label: "Formatação", value: "" }, ...BLOCKS]}
-          onChange={(v) => v && exec("formatBlock", `<${v}>`)}
-        />
-        <Divider />
-        <ColorMenu title="Cor da letra" label="A●" onPick={(c) => exec("foreColor", c)} />
-        <FillStrokeMenu
-          title="Cor de fundo do texto (preenchimento e traçado)"
-          label="▨"
-          defaultFill="#3a1116"
-          defaultStroke="#ef4444"
-          onApply={textHighlight}
-        />
-        <Divider />
-        <TBSelect
-          title="Alinhar e Recuar"
-          value=""
-          width="10rem"
-          options={[{ label: "Alinhar e Recuar", value: "" }, ...ALIGNMENTS]}
-          onChange={(v) => v && exec(v)}
-        />
-        <TB title="Alinhar à esquerda" active={state.left} onClick={() => exec("justifyLeft")}>⇤</TB>
-        <TB title="Alinhar no centro" active={state.center} onClick={() => exec("justifyCenter")}>≡</TB>
-        <TB title="Alinhar à direita" active={state.right} onClick={() => exec("justifyRight")}>⇥</TB>
-        <TB title="Justificar" active={state.justify} onClick={() => exec("justifyFull")}>☰</TB>
-        <Divider />
-        <TB title="Lista com marcadores" active={state.ul} onClick={() => exec("insertUnorderedList")}>•—</TB>
-        <BulletMenu onPick={applyBullet} />
-        <TB title="Lista numerada" active={state.ol} onClick={() => exec("insertOrderedList")}>1—</TB>
-        <TB title="Lista de verificação" onClick={checklist}>☑—</TB>
-        <TB title="Diminuir recuo" onClick={() => exec("outdent")}>⇠</TB>
-        <TB title="Aumentar recuo" onClick={() => exec("indent")}>⇢</TB>
+    <div className="relative flex flex-col rounded-xl border border-border bg-background/80 shadow-xl overflow-hidden">
+      {/* Top Toolbar */}
+      <Toolbar
+        selectionState={selectionState}
+        viewMode={viewMode}
+        previewDevice={previewDevice}
+        inspectorOpen={inspectorOpen}
+        hasCopiedStyle={Boolean(copiedStyles)}
+        htmlContent={value}
+        onSetViewMode={setViewMode}
+        onSetPreviewDevice={setPreviewDevice}
+        onToggleInspector={() => setInspectorOpen((o) => !o)}
+        onExecCommand={exec}
+        onApplyFont={(font) => exec("fontName", font)}
+        onApplyFontSize={(size) => applyStyleToTarget("font-size", size)}
+        onApplyBlock={(block) => exec("formatBlock", `<${block}>`)}
+        onApplyColor={(col) => exec("foreColor", col)}
+        onApplyHighlight={(col) => applyStyleToTarget("background-color", col)}
+        onCopyStyle={handleCopyStyle}
+        onPasteStyle={handlePasteStyle}
+        onInsertComponent={handleInsertComponent}
+        onInsertChar={(char) => insertHTML(char)}
+        onOpenSearch={() => setSearchOpen(true)}
+        onOpenExport={() => setExportOpen(true)}
+        onOpenImport={() => setImportOpen(true)}
+        onOpenCustomComponents={() => setCustomComponentsOpen(true)}
+        onInsertTOC={(toc) => insertHTML(toc)}
+        onJumpToOutline={handleJumpToOutline}
+        onClearDocument={() => {
+          if (window.confirm("Limpar todo o documento?")) {
+            onChange("");
+            if (editorRef.current) editorRef.current.innerHTML = "";
+          }
+        }}
+      />
 
-        <TB title="Citação" onClick={() => exec("formatBlock", "<blockquote>")}>❝</TB>
-        <Divider />
-        <TBSelect
-          title="Espaçamento entre linhas"
-          value=""
-          width="7rem"
-          options={[
-            { label: "Linhas", value: "" },
-            ...LINE_HEIGHTS.map((v) => ({ label: v, value: v })),
-          ]}
-          onChange={(v) => v && applyBlockStyle("line-height", v)}
-        />
-        <TBSelect
-          title="Espaçamento entre parágrafos"
-          value=""
-          width="8rem"
-          options={[
-            { label: "Parágrafos", value: "" },
-            ...PARAGRAPH_SPACING.map((v) => ({ label: v, value: v })),
-          ]}
-          onChange={(v) => v && applyBlockStyle("margin-bottom", v)}
-        />
-        <Divider />
-        <TB title="Inserir link" onClick={promptInsert.link}>🔗</TB>
-        <TB title="Remover link" onClick={() => exec("unlink")}>🔗✕</TB>
-        <TB title="Inserir imagem" onClick={promptInsert.image}>🖼️</TB>
-        <TB title="Inserir vídeo" onClick={promptInsert.video}>🎬</TB>
-        <TB title="Inserir tabela" onClick={promptInsert.table}>▦</TB>
-        <Divider />
-        <FillStrokeMenu
-          title="Moldura (preenchimento e traçado)"
-          label="▭"
-          defaultFill="#150a0c"
-          defaultStroke="#ef4444"
-          onApply={frame}
-        />
+      {/* Main Content Area based on View Mode */}
+      <div className="relative flex-1">
+        {/* VISUAL WYSIWYG MODE */}
+        {viewMode === "visual" && (
+          <div
+            ref={editorRef}
+            contentEditable
+            suppressContentEditableWarning
+            role="textbox"
+            aria-multiline="true"
+            aria-label="Editor de Regras e Documentos"
+            style={{ minHeight }}
+            onInput={emit}
+            onBlur={() => {
+              saveRange();
+              emit();
+            }}
+            onKeyUp={handleKeyUp}
+            onKeyDown={handleKeyDown}
+            onMouseUp={() => {
+              saveRange();
+              refreshSelectionState();
+            }}
+            onContextMenu={handleContextMenu}
+            className="rich-content p-6 outline-none max-h-[70vh] overflow-y-auto leading-relaxed focus:ring-1 focus:ring-primary/40 rounded-b-xl"
+          />
+        )}
 
-        <ColorMenu title="Caixa de aviso com moldura" label="⚠▣" onPick={calloutFrame} />
-        <ColorMenu title="Texto com brilho" label="A✨" onPick={glow} />
-        <ColorMenu title="Texto com moldura (destaque)" label="A▢" onPick={badge} />
-        <Divider />
-        <TB title="Item de regra numerado" onClick={ruleItem}>§</TB>
-        <TB title="Bloco de destaque (número grande)" onClick={stat}>#</TB>
-        <TB title="Spoiler" onClick={promptInsert.spoiler}>👁️</TB>
-        <TB title="Comentário" onClick={promptInsert.comment}>💬</TB>
-        <TB title="Linha divisória" onClick={() => insertHTML('<hr class="rc-hr" />')}>—</TB>
-        <TB
-          title="Paginação (quebra de página)"
-          onClick={() => insertHTML('<div class="rc-pagebreak"></div><p><br></p>')}
-        >
-          ⤓
-        </TB>
-        <Divider />
-        <span className="relative">
-          <TB title="Emojis" onClick={() => setEmojiOpen((o) => !o)}>😀</TB>
-          {emojiOpen && (
-            <div className="absolute left-0 top-9 z-50 grid w-[17rem] grid-cols-10 gap-1 rounded-lg border border-border bg-popover p-2 shadow-xl">
-              {EMOJIS.map((e) => (
-                <button
-                  key={e}
-                  type="button"
-                  onMouseDown={(ev) => ev.preventDefault()}
-                  onClick={() => {
-                    insertHTML(e);
-                    setEmojiOpen(false);
-                  }}
-                  className="rounded p-1 text-base hover:bg-secondary"
-                >
-                  {e}
-                </button>
-              ))}
+        {/* PREVIEW REAL MODE */}
+        {viewMode === "preview" && (
+          <div className="flex justify-center bg-card/40 p-6 max-h-[70vh] overflow-y-auto">
+            <div
+              style={{
+                width:
+                  previewDevice === "mobile"
+                    ? "375px"
+                    : previewDevice === "tablet"
+                      ? "768px"
+                      : "100%",
+                maxWidth: "100%",
+              }}
+              className="rounded-xl border border-border bg-background p-6 shadow-2xl transition-all"
+            >
+              <div className="mb-4 flex items-center justify-between border-b border-border pb-2 text-xs text-muted-foreground">
+                <span className="font-bold uppercase tracking-wider text-primary">
+                  Pré-visualização: {previewDevice.toUpperCase()}
+                </span>
+                <span>Fidelidade 100% ao site</span>
+              </div>
+              <RichContent html={value} />
             </div>
-          )}
-        </span>
-        <TB title="Código-fonte (HTML)" active={source} onClick={() => setSource((s) => !s)}>
-          &lt;/&gt;
-        </TB>
+          </div>
+        )}
+
+        {/* HTML SOURCE MODE */}
+        {viewMode === "html" && (
+          <div className="p-4 bg-background">
+            <textarea
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              spellCheck={false}
+              style={{ minHeight }}
+              placeholder="Cole ou edite seu código HTML aqui..."
+              className="w-full resize-y bg-background font-mono text-xs leading-relaxed text-foreground outline-none border border-border rounded-lg p-4 focus:border-primary"
+            />
+          </div>
+        )}
+
+        {/* JSON AST / STRUCTURE MODE */}
+        {viewMode === "json" && (
+          <div className="p-4 bg-background">
+            <textarea
+              readOnly
+              value={JSON.stringify(
+                {
+                  version: "2.0",
+                  generator: "thuglife-visual-rules-editor",
+                  timestamp: Date.now(),
+                  length: value.length,
+                  html: value,
+                },
+                null,
+                2
+              )}
+              style={{ minHeight }}
+              className="w-full resize-y bg-background font-mono text-xs leading-relaxed text-primary outline-none border border-border rounded-lg p-4"
+            />
+          </div>
+        )}
       </div>
 
-      {source ? (
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          spellCheck={false}
-          style={{ minHeight }}
-          className="w-full resize-y bg-background p-4 font-mono text-xs leading-relaxed text-foreground outline-none"
-        />
-      ) : (
+      {/* Quick Slash Menu */}
+      <QuickSlashMenu
+        isOpen={slashMenuOpen}
+        filterText={slashFilter}
+        position={slashPos}
+        onSelect={(cmd) => {
+          setSlashMenuOpen(false);
+          handleInsertComponent(cmd);
+        }}
+        onClose={() => setSlashMenuOpen(false)}
+      />
+
+      {/* Right-click Context Menu */}
+      {contextMenuPos && (
         <div
-          ref={ref}
-          contentEditable
-          suppressContentEditableWarning
-          role="textbox"
-          aria-multiline="true"
-          aria-label="Editor de texto"
-          style={{ minHeight }}
-          onInput={emit}
-          onBlur={() => {
-            saveRange();
-            emit();
-          }}
-          onKeyUp={() => {
-            saveRange();
-            refreshState();
-          }}
-          onMouseUp={() => {
-            saveRange();
-            refreshState();
-          }}
-          className="rich-content max-h-[60vh] overflow-y-auto p-4 outline-none"
-        />
+          style={{ top: contextMenuPos.y, left: contextMenuPos.x }}
+          className="fixed z-50 w-52 rounded-xl border border-border bg-popover/95 backdrop-blur shadow-2xl p-1 text-xs animate-in fade-in"
+          onClick={closeContextMenu}
+        >
+          <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border/50">
+            Ações do Elemento
+          </div>
+          <button
+            type="button"
+            onClick={() => setInspectorOpen(true)}
+            className="flex w-full items-center gap-2 rounded px-2 py-1.5 hover:bg-secondary text-left font-medium"
+          >
+            ⚙️ Personalizar no Painel
+          </button>
+          <button
+            type="button"
+            onClick={handleCopyStyle}
+            className="flex w-full items-center gap-2 rounded px-2 py-1.5 hover:bg-secondary text-left font-medium"
+          >
+            🖌️ Copiar Estilo
+          </button>
+          <button
+            type="button"
+            onClick={handlePasteStyle}
+            className="flex w-full items-center gap-2 rounded px-2 py-1.5 hover:bg-secondary text-left font-medium"
+          >
+            📋 Colar Estilo
+          </button>
+          <div className="my-1 border-t border-border/50" />
+          <button
+            type="button"
+            onClick={() => {
+              if (targetContextNode && targetContextNode !== editorRef.current) {
+                const clone = targetContextNode.cloneNode(true);
+                targetContextNode.parentNode?.insertBefore(clone, targetContextNode.nextSibling);
+                emit();
+                toast.success("Elemento duplicado com sucesso!");
+              }
+            }}
+            className="flex w-full items-center gap-2 rounded px-2 py-1.5 hover:bg-secondary text-left font-medium"
+          >
+            📑 Duplicar Bloco
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (targetContextNode && targetContextNode !== editorRef.current) {
+                const prev = targetContextNode.previousElementSibling;
+                if (prev) {
+                  targetContextNode.parentNode?.insertBefore(targetContextNode, prev);
+                  emit();
+                }
+              }
+            }}
+            className="flex w-full items-center gap-2 rounded px-2 py-1.5 hover:bg-secondary text-left font-medium"
+          >
+            ↑ Mover para Cima
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (targetContextNode && targetContextNode !== editorRef.current) {
+                const next = targetContextNode.nextElementSibling;
+                if (next) {
+                  targetContextNode.parentNode?.insertBefore(next, targetContextNode);
+                  emit();
+                }
+              }
+            }}
+            className="flex w-full items-center gap-2 rounded px-2 py-1.5 hover:bg-secondary text-left font-medium"
+          >
+            ↓ Mover para Baixo
+          </button>
+          <div className="my-1 border-t border-border/50" />
+          <button
+            type="button"
+            onClick={() => {
+              if (targetContextNode && targetContextNode !== editorRef.current) {
+                targetContextNode.remove();
+                emit();
+                toast.success("Elemento excluído.");
+              }
+            }}
+            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-destructive hover:bg-destructive/10 text-left font-medium"
+          >
+            🗑️ Excluir Bloco
+          </button>
+        </div>
       )}
 
-      <div className="flex items-center justify-between gap-3 border-t border-border bg-secondary/30 px-3 py-2">
-        <p className="text-[11px] text-muted-foreground">
-          Selecione o texto antes de aplicar molduras, brilho ou destaques. Use o Código-Fonte para ajustes finos.
-        </p>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            if (window.confirm("Limpar todo o conteúdo do editor?")) onChange("");
-            if (ref.current) ref.current.innerHTML = "";
-          }}
-        >
-          Limpar
-        </Button>
+      {/* Property Inspector Panel */}
+      <InspectorPanel
+        isOpen={inspectorOpen}
+        onClose={() => setInspectorOpen(false)}
+        onApplyStyle={applyStyleToTarget}
+        onApplyBatchStyles={applyBatchStyles}
+        onWrapWithCustomTag={(tag, styles, cls) => {
+          const styleStr = Object.entries(styles)
+            .map(([k, v]) => `${k}:${v}`)
+            .join(";");
+          wrapSelection(`<${tag} class="${cls || ""}" style="${styleStr}">`, `</${tag}>`, "conteúdo");
+        }}
+        onApplyThemePreset={(preset) => {
+          toast.success(`Preset "${preset}" aplicado ao editor!`);
+        }}
+      />
+
+      {/* Dialogs */}
+      <SearchReplaceDialog
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onSearch={handleSearch}
+        onNext={handleNextSearch}
+        onPrev={handlePrevSearch}
+        onReplace={handleReplace}
+        onReplaceAll={handleReplaceAll}
+      />
+
+      <ExportImportDialog
+        isOpen={exportOpen}
+        mode="export"
+        htmlContent={value}
+        onClose={() => setExportOpen(false)}
+        onImportContent={onChange}
+      />
+
+      <ExportImportDialog
+        isOpen={importOpen}
+        mode="import"
+        htmlContent={value}
+        onClose={() => setImportOpen(false)}
+        onImportContent={onChange}
+      />
+
+      <CustomComponentsManager
+        isOpen={customComponentsOpen}
+        onClose={() => setCustomComponentsOpen(false)}
+        onInsert={(html) => insertHTML(html)}
+        selectedHtml={selectedHTML()}
+      />
+
+      {/* Status Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-secondary/30 px-3 py-2 text-[11px] text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <span
+            className={`inline-block h-2 w-2 rounded-full ${
+              saveStatus === "saving" ? "bg-amber-400 animate-ping" : "bg-emerald-400"
+            }`}
+          />
+          <span>
+            {saveStatus === "saving"
+              ? "Salvando alterações..."
+              : lastSavedTime
+                ? `Salvo às ${lastSavedTime}`
+                : "Pronto para edição"}
+          </span>
+          <span className="hidden sm:inline">· Digite &ldquo;/&rdquo; no editor para comandos rápidos</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span>{value.length} caracteres</span>
+        </div>
       </div>
     </div>
   );

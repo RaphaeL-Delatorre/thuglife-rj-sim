@@ -2,11 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import logoAsset from "@/assets/logo-tl.png.asset.json";
+import logoLocal from "@/assets/logo.png";
 import { RichContent } from "@/components/editor/RichContent";
 import { getSiteContent } from "@/lib/site.functions";
 import type { SiteContent } from "@/lib/site.functions";
 
-const logoImg = logoAsset.url;
+const logoImg = logoLocal || logoAsset.url;
 
 export const Route = createFileRoute("/regras/")({
   loader: () => getSiteContent(),

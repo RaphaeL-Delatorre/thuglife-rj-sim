@@ -12,10 +12,6 @@
  *
  * The :root and .dark blocks define the actual color values using oklch.
  * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
  */
 
 @theme inline {
@@ -198,7 +194,7 @@
   .bg-slide { animation-duration: 0s; }
 }
 
-/* ── Conteúdo rico (editor do painel + páginas de regras) ───────────── */
+/* ── Conteúdo rico (Editor Visual + Páginas de Regras RP) ───────────── */
 .rich-content {
   color: var(--muted-foreground);
   font-size: 0.95rem;
@@ -210,7 +206,9 @@
 .rich-content h1,
 .rich-content h2,
 .rich-content h3,
-.rich-content h4 {
+.rich-content h4,
+.rich-content h5,
+.rich-content h6 {
   color: var(--foreground);
   font-family: var(--font-display);
   letter-spacing: 0.02em;
@@ -221,7 +219,9 @@
 .rich-content h2 { font-size: 1.55rem; }
 .rich-content h3 { font-size: 1.25rem; }
 .rich-content h4 { font-size: 1.05rem; }
-.rich-content strong, .rich-content b { color: var(--foreground); }
+.rich-content h5 { font-size: 0.95rem; }
+.rich-content h6 { font-size: 0.85rem; }
+.rich-content strong, .rich-content b { color: var(--foreground); font-weight: 700; }
 .rich-content a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
 .rich-content ul, .rich-content ol { margin: 0 0 1rem 1.35rem; }
 .rich-content ul { list-style: disc; }
@@ -314,6 +314,7 @@
   border-radius: 0.35rem;
   padding: 0.05rem 0.4rem;
   font-weight: 700;
+  display: inline-block;
 }
 .rich-content .rc-rule { display: block; padding-left: 1.4rem; position: relative; }
 .rich-content .rc-rule::before { content: "▶"; color: var(--primary); font-size: 0.7rem; left: 0; position: absolute; top: 0.35rem; }
@@ -345,7 +346,7 @@
   position: absolute;
   top: 0.6rem;
 }
-/* Marcadores personalizados escolhidos no editor */
+/* Marcadores personalizados */
 .rich-content ul.rc-bullets { list-style: none; margin-left: 0.35rem; }
 .rich-content ul.rc-bullets > li { position: relative; padding-left: 1.5rem; }
 .rich-content ul.rc-bullets > li::before {
@@ -425,4 +426,140 @@
   margin: 2rem 0;
   break-after: page;
   page-break-after: always;
+}
+
+/* ── NOVOS COMPONENTES VISUAIS EXPANDIDOS ───────────────────────────── */
+
+/* Componentes de Regra e Penalidade */
+.rich-content .rc-rule-card {
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  padding: 1.2rem;
+  margin: 1.2rem 0;
+  background: oklch(0.18 0.01 20 / 0.65);
+  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s, border-color 0.2s;
+}
+.rich-content .rc-rule-card:hover {
+  border-color: var(--primary);
+}
+
+.rich-content .rc-penalty-card {
+  border-left: 4px solid #ef4444;
+  background: #ef444414;
+  border-radius: 0 0.8rem 0.8rem 0;
+  padding: 1rem 1.2rem;
+  margin: 1.2rem 0;
+}
+
+/* Comparativo Permitido vs Proibido */
+.rich-content .rc-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+/* Cards Temáticos e Alertas */
+.rich-content .rc-card-box {
+  border-radius: 0.85rem;
+  padding: 1.2rem;
+  margin: 1.2rem 0;
+  box-shadow: 0 6px 25px -8px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+}
+
+/* Accordion Visual no Conteúdo */
+.rich-content .rc-accordion {
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  overflow: hidden;
+  margin: 1.2rem 0;
+  background: oklch(0.18 0.01 20 / 0.55);
+}
+.rich-content .rc-accordion details {
+  border-bottom: 1px solid var(--border);
+}
+.rich-content .rc-accordion details:last-child {
+  border-bottom: 0;
+}
+.rich-content .rc-accordion summary {
+  padding: 0.9rem 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  background: color-mix(in oklab, var(--card) 90%, transparent);
+  transition: background-color 0.2s;
+}
+.rich-content .rc-accordion summary:hover {
+  background: color-mix(in oklab, var(--primary) 10%, var(--card));
+}
+.rich-content .rc-accordion .rc-accordion-body {
+  padding: 1rem 1.2rem;
+  border-top: 1px solid var(--border);
+  background: oklch(0.14 0.01 20 / 0.4);
+}
+
+/* Divisores Luminosos e Decorativos */
+.rich-content .rc-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 2rem 0;
+  color: var(--muted-foreground);
+}
+.rich-content .rc-divider::before,
+.rich-content .rc-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--border);
+}
+.rich-content .rc-divider:not(:empty)::before {
+  margin-right: 1rem;
+}
+.rich-content .rc-divider:not(:empty)::after {
+  margin-left: 1rem;
+}
+.rich-content .rc-divider-glow {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
+  box-shadow: 0 0 12px #8b5cf6;
+  border: 0;
+  margin: 2rem 0;
+}
+
+/* Glassmorphism utility */
+.rich-content .rc-glass {
+  background: rgba(255, 255, 255, 0.04) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+}
+
+/* Animações Visuais */
+@keyframes rc-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.02); opacity: 0.9; }
+}
+@keyframes rc-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px #8b5cf6); }
+  50% { filter: drop-shadow(0 0 16px #8b5cf6); }
+}
+.rich-content .rc-anim-pulse { animation: rc-pulse 3s infinite ease-in-out; }
+.rich-content .rc-anim-glow { animation: rc-glow 2.5s infinite ease-in-out; }
+.rich-content .rc-anim-fade { animation: fadeIn 0.8s ease-out; }
+.rich-content .rc-anim-slide { animation: slideInUp 0.6s ease-out; }
+
+/* Impressão / PDF */
+@media print {
+  body { background: white !important; color: black !important; }
+  .rich-content { color: black !important; font-size: 11pt !important; }
+  .rich-content h1, .rich-content h2, .rich-content h3 { color: black !important; }
+  .rich-content .rc-frame, .rich-content .rc-card-box { border-color: #999 !important; background: none !important; }
 }

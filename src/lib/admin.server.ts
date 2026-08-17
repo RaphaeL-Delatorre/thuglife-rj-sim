@@ -80,39 +80,54 @@ export async function loadAdminData() {
 }
 
 export async function bootstrap() {
-  const db = await admin();
-  const { data: existing } = await db
-    .from("profiles")
-    .select("id")
-    .eq("email", `rbtl@${EMAIL_DOMAIN}`)
-    .maybeSingle();
-  if (existing) return { created: false };
-
-  let { data: role } = await db.from("roles").select("id").eq("name", "Desenvolvedor").maybeSingle();
-  if (!role) {
-    const inserted = await db
-      .from("roles")
-      .insert({ name: "Desenvolvedor", description: "Acesso total ao painel e ao site.", permissions: ["*"], is_system: true })
+  try {
+    const db = await admin();
+    const { data: existing } = await db
+      .from("profiles")
       .select("id")
-      .single();
-    role = inserted.data;
-  }
+      .eq("email", `rbtl@${EMAIL_DOMAIN}`)
+      .maybeSingle();
+    if (existing) return { created: false };
 
-  const created = await db.auth.admin.createUser({
-    email: `rbtl@${EMAIL_DOMAIN}`,
-    password: "123456",
-    email_confirm: true,
-  });
-  if (created.error || !created.data.user) {
-    return { created: false, error: created.error?.message ?? "" };
+    let { data: role } = await db.from("roles").select("id").eq("name", "Desenvolvedor").maybeSingle();
+    if (!role) {
+      const inserted = await db
+        .from("roles")
+        .insert({ name: "Desenvolvedor", description: "Acesso total ao painel e ao site.", permissions: ["*"], is_system: true })
+        .select("id")
+        .maybeSingle();
+      role = inserted.data;
+    }
+
+    let createdUser: { id: string } | null = null;
+    try {
+      const created = await db.auth.admin.createUser({
+        email: `rbtl@${EMAIL_DOMAIN}`,
+        password: "123456",
+        email_confirm: true,
+      });
+      if (created.data?.user) createdUser = created.data.user;
+    } catch {
+      const { data: signData } = await db.auth.signUp({
+        email: `rbtl@${EMAIL_DOMAIN}`,
+        password: "123456",
+      });
+      if (signData?.user) createdUser = signData.user;
+    }
+
+    if (createdUser) {
+      await db.from("profiles").insert({
+        id: createdUser.id,
+        email: `rbtl@${EMAIL_DOMAIN}`,
+        display_name: "RBTL",
+        role_id: role?.id ?? null,
+      });
+      return { created: true };
+    }
+  } catch (err) {
+    console.error("Bootstrap admin error:", err);
   }
-  await db.from("profiles").insert({
-    id: created.data.user.id,
-    email: `rbtl@${EMAIL_DOMAIN}`,
-    display_name: "RBTL",
-    role_id: role?.id ?? null,
-  });
-  return { created: true };
+  return { created: false };
 }
 
 type LooseResult = Promise<{ error: { message: string } | null }>;
