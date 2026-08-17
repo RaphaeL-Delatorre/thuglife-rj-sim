@@ -59,7 +59,6 @@ const CATEGORY_FIELDS: FieldDef[] = [
     type: "richtext",
     hint: "Aparece no início da página, fora da moldura dos menus.",
   },
-  { key: "content_html", label: "Conteúdo da página (editor completo)", type: "richtext" },
   {
     key: "outro_html",
     label: "Mensagem final (depois dos menus)",
@@ -71,11 +70,18 @@ const CATEGORY_FIELDS: FieldDef[] = [
 ];
 
 const ACTION_FIELDS: FieldDef[] = [
-  { key: "porte", label: "Porte", type: "text", placeholder: "Ex.: Pequeno Porte" },
+  { key: "porte", label: "Porte (grupo)", type: "text", placeholder: "Ex.: Pequeno Porte" },
+  { key: "icon", label: "Ícone / emoji", type: "text", placeholder: "Ex.: 🏦" },
   { key: "nome", label: "Nome da ação", type: "text" },
   { key: "bandidos", label: "Bandidos", type: "number" },
   { key: "policia", label: "Polícia", type: "number" },
   { key: "regras", label: "Regras (uma por linha)", type: "list" },
+  {
+    key: "html",
+    label: "Conteúdo do menu (editor completo)",
+    type: "richtext",
+    hint: "Se preenchido, aparece ao abrir o menu da ação no site.",
+  },
   { key: "sort_order", label: "Ordem", type: "number" },
 ];
 
@@ -206,7 +212,7 @@ function DashboardPage() {
             <RulesPanel
               sections={data.sections as RuleSection[]}
               rules={data.rules as RuleItem[]}
-              categories={data.categories as RuleCategory[]}
+              settings={data.settings as Record<string, string>}
               can={allow}
               onChanged={reload}
             />
