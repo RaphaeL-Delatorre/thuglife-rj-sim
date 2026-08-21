@@ -26,6 +26,11 @@ const FIELDS: { key: string; label: string; type: "text" | "textarea" }[] = [
   { key: "rulesTitle", label: "Título da página de regras", type: "text" },
   { key: "rulesIntro", label: "Introdução da página de regras", type: "textarea" },
   { key: "rulesImportant", label: "Aviso importante das regras", type: "textarea" },
+  {
+    key: "wallpapers",
+    label: "Imagens de fundo (uma URL por linha, trocam a cada 3s)",
+    type: "textarea",
+  },
 ];
 
 export function SettingsPanel({

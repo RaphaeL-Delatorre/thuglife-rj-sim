@@ -36,9 +36,10 @@ export const Route = createFileRoute("/regras/$slug")({
   component: CategoriaPage,
 });
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({ children, settings }: { children: React.ReactNode; settings?: Record<string, string> }) {
   return (
     <div className="relative min-h-screen font-body text-foreground">
+      <SiteBackground settings={settings ?? {}} />
       <header className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-md">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <Link to="/" className="flex items-center gap-3">
@@ -149,12 +150,12 @@ function Secao({
 }
 
 function CategoriaPage() {
-  const { category, sections, rules }: RuleCategoryPage = Route.useLoaderData();
+  const { category, sections, rules, settings }: RuleCategoryPage = Route.useLoaderData();
   const [busca, setBusca] = useState("");
   if (!category) return <Fallback title="Categoria não encontrada" />;
 
   return (
-    <Shell>
+    <Shell settings={settings}>
       <Link to="/regras" className="text-xs font-bold uppercase tracking-[0.25em] text-primary">
         ← Regras
       </Link>
