@@ -76,6 +76,8 @@ export type Database = {
           body: string
           created_at: string
           id: string
+          media_type: string | null
+          media_url: string | null
           published: boolean
           sort_order: number
           tag: string
@@ -85,6 +87,8 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           published?: boolean
           sort_order?: number
           tag?: string
@@ -94,6 +98,8 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           published?: boolean
           sort_order?: number
           tag?: string
