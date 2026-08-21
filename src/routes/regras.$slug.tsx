@@ -2,12 +2,12 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 
 import logoAsset from "@/assets/logo-tl.png.asset.json";
-import logoLocal from "@/assets/logo.png";
+import { SiteBackground } from "@/components/SiteBackground";
 import { RichContent } from "@/components/editor/RichContent";
 import { getRuleCategory } from "@/lib/site.functions";
 import type { RuleCategoryPage } from "@/lib/site.functions";
 
-const logoImg = logoLocal || logoAsset.url;
+const logoImg = logoAsset.url;
 
 export const Route = createFileRoute("/regras/$slug")({
   loader: async ({ params }) => {
@@ -67,7 +67,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </nav>
       </header>
-      <main className="mx-auto max-w-4xl px-5 pt-28 pb-24">{children}</main>
+      <main className="mx-auto max-w-7xl px-5 pt-28 pb-24">{children}</main>
     </div>
   );
 }
