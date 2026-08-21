@@ -146,27 +146,7 @@ function Index() {
   return (
     <div className="relative min-h-screen font-body text-foreground">
       {/* Background cinematográfico global */}
-      <div aria-hidden className="fixed inset-0 -z-10 overflow-hidden bg-background">
-        {bgSlides.map((src, i) => (
-          <div
-            key={src}
-            className="bg-slide"
-            style={{ backgroundImage: `url(${src})`, animationDelay: `${i * 8}s` }}
-          />
-        ))}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(120% 80% at 50% 0%, oklch(0.58 0.245 27 / 0.28) 0%, transparent 55%), linear-gradient(180deg, oklch(0.09 0.01 20 / 0.82), oklch(0.09 0.01 20 / 0.94))",
-          }}
-        />
-        <div className="tl-scanlines absolute inset-0 opacity-40 mix-blend-overlay" />
-        <div
-          className="absolute inset-0"
-          style={{ background: "radial-gradient(100% 100% at 50% 50%, transparent 45%, oklch(0 0 0 / 0.85) 100%)" }}
-        />
-      </div>
+      <SiteBackground settings={cfg} />
 
       <header className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
