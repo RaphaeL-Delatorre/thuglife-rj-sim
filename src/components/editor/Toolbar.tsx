@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,11 +7,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ColorPickerPopover } from "./ColorPickerPopover";
 import { EmojiSpecialPicker } from "./EmojiSpecialPicker";
 import { DocumentOutline } from "./DocumentOutline";
 import { BLOCKS, FONTS, FONT_SIZES } from "./editor-constants";
 import type { EditorViewMode, PreviewDevice, SelectionFormatState } from "./editor-types";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface ToolbarProps {
   selectionState: SelectionFormatState;
@@ -27,8 +30,8 @@ interface ToolbarProps {
   onApplyFont: (font: string) => void;
   onApplyFontSize: (size: string) => void;
   onApplyBlock: (block: string) => void;
-  onApplyColor: (color: string) => void;
-  onApplyHighlight: (color: string) => void;
+  onApplyColor: (color: string, isGradient?: boolean) => void;
+  onApplyHighlight: (color: string, isGradient?: boolean) => void;
   onCopyStyle: () => void;
   onPasteStyle: () => void;
   onInsertComponent: (type: string) => void;
@@ -99,6 +102,16 @@ export function Toolbar({
       {children}
     </button>
   );
+
+  const [customSizeOpen, setCustomSizeOpen] = useState(false);
+  const [customSize, setCustomSize] = useState("16");
+
+  const applyCustomSize = () => {
+    const parsed = Number(customSize);
+    if (!Number.isFinite(parsed) || parsed < 8 || parsed > 200) return;
+    onApplyFontSize(`${Math.round(parsed)}px`);
+    setCustomSizeOpen(false);
+  };
 
   const Divider = () => <span className="mx-1 h-5 w-px bg-border/80 shrink-0" />;
 
@@ -213,10 +226,18 @@ export function Toolbar({
         <Divider />
 
         {/* Basic text styling */}
-        <TB title="Negrito (Ctrl+B)" active={selectionState.bold} onClick={() => onExecCommand("bold")}>
+        <TB
+          title="Negrito (Ctrl+B)"
+          active={selectionState.bold}
+          onClick={() => onExecCommand("bold")}
+        >
           <strong>B</strong>
         </TB>
-        <TB title="Itálico (Ctrl+I)" active={selectionState.italic} onClick={() => onExecCommand("italic")}>
+        <TB
+          title="Itálico (Ctrl+I)"
+          active={selectionState.italic}
+          onClick={() => onExecCommand("italic")}
+        >
           <em>I</em>
         </TB>
         <TB
@@ -274,6 +295,53 @@ export function Toolbar({
             </option>
           ))}
         </select>
+
+        {/* Custom Size */}
+        <Popover open={customSizeOpen} onOpenChange={setCustomSizeOpen}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              title="Tamanho personalizado (px)"
+              aria-label="Tamanho personalizado da fonte"
+              onMouseDown={(e) => e.preventDefault()}
+              className="flex h-8 items-center rounded border border-border bg-background px-2 text-xs font-semibold text-foreground/80 transition-colors hover:bg-secondary hover:text-foreground"
+            >
+              px
+            </button>
+          </PopoverTrigger>
+          <PopoverContent
+            align="start"
+            className="w-48 p-3"
+            onOpenAutoFocus={(event) => event.preventDefault()}
+          >
+            <div className="space-y-2">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Tamanho personalizado
+              </p>
+              <div className="flex items-center gap-1.5">
+                <Input
+                  type="number"
+                  min={8}
+                  max={200}
+                  value={customSize}
+                  onChange={(e) => setCustomSize(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      applyCustomSize();
+                    }
+                  }}
+                  className="h-8 text-xs"
+                />
+                <span className="text-xs text-muted-foreground">px</span>
+              </div>
+              <Button type="button" size="sm" className="w-full text-xs" onClick={applyCustomSize}>
+                Aplicar tamanho
+              </Button>
+              <p className="text-[10px] text-muted-foreground">Valores de 8 a 200 pixels.</p>
+            </div>
+          </PopoverContent>
+        </Popover>
 
         {/* Block Hierarchy Select */}
         <select
@@ -364,14 +432,18 @@ export function Toolbar({
               <span className="mr-2">⚖️</span>
               <div className="flex flex-col">
                 <span className="font-bold text-xs">Item de Regra (Código + Penalidade)</span>
-                <span className="text-[10px] text-muted-foreground">Ex: 1.1 Metagaming + Status</span>
+                <span className="text-[10px] text-muted-foreground">
+                  Ex: 1.1 Metagaming + Status
+                </span>
               </div>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("penalty")}>
               <span className="mr-2">🛑</span>
               <div className="flex flex-col">
                 <span className="font-bold text-xs">Cartão de Penalidade</span>
-                <span className="text-[10px] text-muted-foreground">Banimento, Advertência, Perda</span>
+                <span className="text-[10px] text-muted-foreground">
+                  Banimento, Advertência, Perda
+                </span>
               </div>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("compare")}>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DOCUMENT_PALETTES, GRADIENT_PRESETS, SWATCH_COLORS } from "./editor-constants";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,9 @@ export function ColorPickerPopover({
   const [gradType, setGradType] = useState<"linear" | "radial">("linear");
   const [gradFrom, setGradFrom] = useState("#8b5cf6");
   const [gradTo, setGradTo] = useState("#ec4899");
+  // Quando o seletor nativo de cor do sistema abre, os cliques fora do popover
+  // (na janela nativa) não devem fechá-lo. Guardamos o momento da abertura.
+  const nativePickerAt = useRef(0);
 
   const buildCurrentColor = (hex: string, a: number) => {
     if (a >= 100) return hex;
@@ -47,7 +50,7 @@ export function ColorPickerPopover({
     type: "linear" | "radial" = gradType,
     angle: number = gradAngle,
     from: string = gradFrom,
-    to: string = gradTo
+    to: string = gradTo,
   ) => {
     const gradStr =
       type === "linear"
@@ -83,6 +86,18 @@ export function ColorPickerPopover({
       <PopoverContent
         align="start"
         className="w-80 p-3 bg-popover/95 backdrop-blur border border-border shadow-2xl z-50"
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        onFocusOutside={(event) => {
+          // Aplicar a cor devolve o foco ao editor; isso não deve fechar o menu.
+          event.preventDefault();
+        }}
+        onInteractOutside={(event) => {
+          // Cliques na janela nativa do seletor de cor contam como "fora";
+          // ignoramos por alguns segundos após abrir o seletor do sistema.
+          if (Date.now() - nativePickerAt.current < 4000) {
+            event.preventDefault();
+          }
+        }}
       >
         <div className="space-y-3">
           <div className="flex items-center justify-between border-b border-border pb-2">
@@ -126,6 +141,9 @@ export function ColorPickerPopover({
                     type="color"
                     aria-label="Selecionar cor do sistema"
                     value={currentHex.slice(0, 7)}
+                    onClick={() => {
+                      nativePickerAt.current = Date.now();
+                    }}
                     onChange={(e) => applySolid(e.target.value)}
                     className="absolute -top-2 -left-2 h-14 w-16 cursor-pointer opacity-0"
                   />
@@ -269,6 +287,9 @@ export function ColorPickerPopover({
                     <input
                       type="color"
                       value={gradFrom}
+                      onClick={() => {
+                        nativePickerAt.current = Date.now();
+                      }}
                       onChange={(e) => {
                         setGradFrom(e.target.value);
                         applyGradient(gradType, gradAngle, e.target.value, gradTo);
@@ -289,6 +310,9 @@ export function ColorPickerPopover({
                     <input
                       type="color"
                       value={gradTo}
+                      onClick={() => {
+                        nativePickerAt.current = Date.now();
+                      }}
                       onChange={(e) => {
                         setGradTo(e.target.value);
                         applyGradient(gradType, gradAngle, gradFrom, e.target.value);

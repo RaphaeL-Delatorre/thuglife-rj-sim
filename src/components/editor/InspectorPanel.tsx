@@ -50,7 +50,9 @@ export function InspectorPanel({
   const [fontWeight, setFontWeight] = useState("400");
   const [letterSpacing, setLetterSpacing] = useState("normal");
   const [lineHeight, setLineHeight] = useState("1.5");
-  const [textTransform, setTextTransform] = useState<"none" | "uppercase" | "lowercase" | "capitalize">("none");
+  const [textTransform, setTextTransform] = useState<
+    "none" | "uppercase" | "lowercase" | "capitalize"
+  >("none");
 
   // Glow state
   const [glowEnabled, setGlowEnabled] = useState(false);
@@ -124,7 +126,13 @@ export function InspectorPanel({
     });
   };
 
-  const handleApplyShadow = (enabled: boolean, x: number, y: number, blur: number, color: string) => {
+  const handleApplyShadow = (
+    enabled: boolean,
+    x: number,
+    y: number,
+    blur: number,
+    color: string,
+  ) => {
     setShadowEnabled(enabled);
     if (!enabled) {
       onApplyStyle("text-shadow", "none");
@@ -367,15 +375,17 @@ export function InspectorPanel({
                   if (isGrad) {
                     onApplyBatchStyles({
                       background: col,
+                      "background-clip": "text",
                       "-webkit-background-clip": "text",
                       "-webkit-text-fill-color": "transparent",
-                      display: "inline-block",
+                      color: "transparent",
                     });
                   } else {
                     onApplyBatchStyles({
                       color: col,
                       "-webkit-text-fill-color": col,
                       background: "none",
+                      "background-clip": "unset",
                       "-webkit-background-clip": "unset",
                     });
                   }
@@ -409,7 +419,9 @@ export function InspectorPanel({
         {tab === "brilho" && (
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider">Ativar Brilho (Glow)</Label>
+              <Label className="text-xs font-semibold uppercase tracking-wider">
+                Ativar Brilho (Glow)
+              </Label>
               <input
                 type="checkbox"
                 checked={glowEnabled}
@@ -504,7 +516,12 @@ export function InspectorPanel({
                 >
                   Texto com Brilho Neon Ativado
                 </div>
-                <Button type="button" variant="outline" className="w-full" onClick={() => handleApplyGlow(false, glowColor, glowBlur, glowLayers)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => handleApplyGlow(false, glowColor, glowBlur, glowLayers)}
+                >
                   Remover brilho do texto selecionado
                 </Button>
               </div>
@@ -516,7 +533,9 @@ export function InspectorPanel({
         {tab === "contorno" && (
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider">Contorno de Texto</Label>
+              <Label className="text-xs font-semibold uppercase tracking-wider">
+                Contorno de Texto
+              </Label>
               <input
                 type="checkbox"
                 checked={strokeEnabled}
@@ -579,7 +598,9 @@ export function InspectorPanel({
         {tab === "sombra" && (
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider">Sombra de Texto</Label>
+              <Label className="text-xs font-semibold uppercase tracking-wider">
+                Sombra de Texto
+              </Label>
               <input
                 type="checkbox"
                 checked={shadowEnabled}
@@ -594,7 +615,9 @@ export function InspectorPanel({
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label className="text-[11px] text-muted-foreground">Deslocamento X ({shadowX}px)</Label>
+                    <Label className="text-[11px] text-muted-foreground">
+                      Deslocamento X ({shadowX}px)
+                    </Label>
                     <input
                       type="range"
                       min="-20"
@@ -609,7 +632,9 @@ export function InspectorPanel({
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-[11px] text-muted-foreground">Deslocamento Y ({shadowY}px)</Label>
+                    <Label className="text-[11px] text-muted-foreground">
+                      Deslocamento Y ({shadowY}px)
+                    </Label>
                     <input
                       type="range"
                       min="-20"
@@ -682,7 +707,9 @@ export function InspectorPanel({
             {bgType === "glass" ? (
               <div className="space-y-3">
                 <div className="space-y-1">
-                  <Label className="text-[11px] text-muted-foreground">Desfoque do Vidro ({glassBlur}px)</Label>
+                  <Label className="text-[11px] text-muted-foreground">
+                    Desfoque do Vidro ({glassBlur}px)
+                  </Label>
                   <input
                     type="range"
                     min="4"
@@ -704,7 +731,9 @@ export function InspectorPanel({
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-[11px] text-muted-foreground">Arredondamento ({borderRadius}px)</Label>
+                <Label className="text-[11px] text-muted-foreground">
+                  Arredondamento ({borderRadius}px)
+                </Label>
                 <input
                   type="range"
                   min="0"
@@ -715,7 +744,9 @@ export function InspectorPanel({
                 />
               </div>
               <div className="space-y-1">
-                <Label className="text-[11px] text-muted-foreground">Espaçamento Interno ({boxPadding}px)</Label>
+                <Label className="text-[11px] text-muted-foreground">
+                  Espaçamento Interno ({boxPadding}px)
+                </Label>
                 <input
                   type="range"
                   min="4"
@@ -862,12 +893,36 @@ export function InspectorPanel({
             </Label>
             <div className="space-y-2">
               {[
-                { name: "Dark RP (Padrão)", color: "#8b5cf6", desc: "Fundo escuro, títulos roxos e glow suave" },
-                { name: "Polícia & Tático", color: "#3b82f6", desc: "Azul marinho, distintivos e linhas táticas" },
-                { name: "Hospital & SAMU", color: "#ef4444", desc: "Vermelho médico, cruzes e alertas sanitários" },
-                { name: "Ilegal & Facções", color: "#dc2626", desc: "Vermelho sangue, caveiras e caixas escuras" },
-                { name: "Cyberpunk Neon", color: "#06b6d4", desc: "Ciano + Rosa Neon vibrante e sombras duplas" },
-                { name: "Ouro & Prestígio", color: "#eab308", desc: "Dourado reluzente para regras VIP/Termos" },
+                {
+                  name: "Dark RP (Padrão)",
+                  color: "#8b5cf6",
+                  desc: "Fundo escuro, títulos roxos e glow suave",
+                },
+                {
+                  name: "Polícia & Tático",
+                  color: "#3b82f6",
+                  desc: "Azul marinho, distintivos e linhas táticas",
+                },
+                {
+                  name: "Hospital & SAMU",
+                  color: "#ef4444",
+                  desc: "Vermelho médico, cruzes e alertas sanitários",
+                },
+                {
+                  name: "Ilegal & Facções",
+                  color: "#dc2626",
+                  desc: "Vermelho sangue, caveiras e caixas escuras",
+                },
+                {
+                  name: "Cyberpunk Neon",
+                  color: "#06b6d4",
+                  desc: "Ciano + Rosa Neon vibrante e sombras duplas",
+                },
+                {
+                  name: "Ouro & Prestígio",
+                  color: "#eab308",
+                  desc: "Dourado reluzente para regras VIP/Termos",
+                },
               ].map((p) => (
                 <button
                   key={p.name}

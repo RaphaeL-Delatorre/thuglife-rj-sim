@@ -6,11 +6,7 @@ import { SearchReplaceDialog } from "./SearchReplaceDialog";
 import { ExportImportDialog } from "./ExportImportDialog";
 import { CustomComponentsManager } from "./CustomComponentsManager";
 import { RichContent } from "./RichContent";
-import type {
-  EditorViewMode,
-  PreviewDevice,
-  SelectionFormatState,
-} from "./editor-types";
+import type { EditorViewMode, PreviewDevice, SelectionFormatState } from "./editor-types";
 import { toast } from "sonner";
 
 const EMPTY_SELECTION_STATE: SelectionFormatState = {
@@ -94,7 +90,7 @@ export function RichTextEditor({
         setSaveStatus("saved");
         const now = new Date();
         setLastSavedTime(
-          `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`
+          `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`,
         );
       }, 300);
     }
@@ -153,7 +149,7 @@ export function RichTextEditor({
       refreshSelectionState();
       saveRange();
     },
-    [emit, restoreRange, refreshSelectionState, saveRange]
+    [emit, restoreRange, refreshSelectionState, saveRange],
   );
 
   const insertHTML = useCallback(
@@ -163,7 +159,7 @@ export function RichTextEditor({
       emit();
       saveRange();
     },
-    [emit, restoreRange, saveRange]
+    [emit, restoreRange, saveRange],
   );
 
   const selectedHTML = useCallback(() => {
@@ -179,7 +175,7 @@ export function RichTextEditor({
       const inner = selectedHTML() || placeholder;
       insertHTML(`${openTag}${inner}${closeTag}`);
     },
-    [insertHTML, selectedHTML]
+    [insertHTML, selectedHTML],
   );
 
   const applyStyleToTarget = useCallback(
@@ -211,7 +207,7 @@ export function RichTextEditor({
         emit();
       }
     },
-    [emit, insertHTML, restoreRange, selectedHTML]
+    [emit, insertHTML, restoreRange, selectedHTML],
   );
 
   const applyBatchStyles = useCallback(
@@ -241,7 +237,21 @@ export function RichTextEditor({
         node = node.parentNode;
       }
     },
-    [emit, insertHTML, restoreRange, selectedHTML]
+    [emit, insertHTML, restoreRange, selectedHTML],
+  );
+
+  // Gradiente aplicado como texto (recorte do fundo nas letras).
+  const applyGradientText = useCallback(
+    (gradient: string) => {
+      applyBatchStyles({
+        background: gradient,
+        "background-clip": "text",
+        "-webkit-background-clip": "text",
+        "-webkit-text-fill-color": "transparent",
+        color: "transparent",
+      });
+    },
+    [applyBatchStyles],
   );
 
   // Format Painter (Copy Style & Paste Style)
@@ -272,7 +282,9 @@ export function RichTextEditor({
         "border-radius": computed.borderRadius,
       };
       setCopiedStyles(stylesObj);
-      toast.success("Estilo copiado com sucesso! Selecione outro texto e clique no pincel para aplicar.");
+      toast.success(
+        "Estilo copiado com sucesso! Selecione outro texto e clique no pincel para aplicar.",
+      );
     }
   }, [saveRange]);
 
@@ -292,8 +304,11 @@ export function RichTextEditor({
       switch (type) {
         case "rule": {
           const code = window.prompt("Código da regra (ex.: 1.1)", "1.1") ?? "1.1";
-          const title = window.prompt("Título da regra (ex.: METAGAMING)", "NOME DA REGRA") ?? "REGRA";
-          const status = window.prompt("Status da regra (PROIBIDO, PERMITIDO, OBRIGATÓRIO)", "PROIBIDO") ?? "PROIBIDO";
+          const title =
+            window.prompt("Título da regra (ex.: METAGAMING)", "NOME DA REGRA") ?? "REGRA";
+          const status =
+            window.prompt("Status da regra (PROIBIDO, PERMITIDO, OBRIGATÓRIO)", "PROIBIDO") ??
+            "PROIBIDO";
           const penalty = window.prompt("Penalidade prevista", "Banimento de 7 a 30 dias.") ?? "";
 
           const isProibido = status.toUpperCase().includes("PROIB");
@@ -326,8 +341,13 @@ export function RichTextEditor({
         }
 
         case "penalty": {
-          const title = window.prompt("Título da Penalidade", "BANIMENTO PERMANENTE") ?? "PENALIDADE";
-          const desc = window.prompt("Descrição / Motivos", "Aplicável em casos de uso de trapaças, racismo, preconceito ou condutas graves.") ?? "";
+          const title =
+            window.prompt("Título da Penalidade", "BANIMENTO PERMANENTE") ?? "PENALIDADE";
+          const desc =
+            window.prompt(
+              "Descrição / Motivos",
+              "Aplicável em casos de uso de trapaças, racismo, preconceito ou condutas graves.",
+            ) ?? "";
           insertHTML(`
             <div class="rc-penalty-card" style="border-left:4px solid #ef4444;background:#ef444414;border-radius:0 0.85rem 0.85rem 0;padding:1.2rem;margin:1.2rem 0;">
               <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;">
@@ -448,7 +468,8 @@ export function RichTextEditor({
         case "stat": {
           const title = window.prompt("Título do Destaque", "Tempo Máximo de Ação") ?? "Destaque";
           const val = window.prompt("Valor em Destaque", "60 MINUTOS") ?? "60";
-          const sub = window.prompt("Legenda / Subtítulo", "Contagem a partir do primeiro disparo.") ?? "";
+          const sub =
+            window.prompt("Legenda / Subtítulo", "Contagem a partir do primeiro disparo.") ?? "";
           insertHTML(`
             <div class="rc-stat" style="border:1px solid #8b5cf6;background:#8b5cf615;border-radius:0.85rem;margin:1.2rem 0;padding:1.2rem;text-align:center;box-shadow:0 0 20px rgba(139,92,246,0.15);">
               <p class="rc-stat-title" style="color:var(--foreground);font-size:0.82rem;font-weight:700;letter-spacing:0.12em;margin:0 0 0.4rem;text-transform:uppercase;">${title}</p>
@@ -494,11 +515,12 @@ export function RichTextEditor({
 
         case "badge": {
           const text = window.prompt("Texto da Etiqueta / Badge", "IMPORTANTE") ?? "TAG";
-          const color = window.prompt("Cor (HEX ex: #8b5cf6, #ef4444, #22c55e)", "#8b5cf6") ?? "#8b5cf6";
+          const color =
+            window.prompt("Cor (HEX ex: #8b5cf6, #ef4444, #22c55e)", "#8b5cf6") ?? "#8b5cf6";
           wrapSelection(
             `<span class="rc-badge" style="border:1px solid ${color};background:${color}22;color:${color};font-size:0.75rem;padding:0.1rem 0.5rem;border-radius:0.35rem;font-weight:700;margin:0 0.2rem;">`,
             `</span>`,
-            text
+            text,
           );
           break;
         }
@@ -511,10 +533,10 @@ export function RichTextEditor({
           const body = Array.from(
             { length: rows },
             () =>
-              `<tr>${Array.from({ length: cols }, () => `<td style="border:1px solid var(--border);padding:0.6rem 1rem;font-size:0.9rem;">Conteúdo</td>`).join("")}</tr>`
+              `<tr>${Array.from({ length: cols }, () => `<td style="border:1px solid var(--border);padding:0.6rem 1rem;font-size:0.9rem;">Conteúdo</td>`).join("")}</tr>`,
           ).join("");
           insertHTML(
-            `<div class="rc-table-wrap" style="overflow-x:auto;margin:1.2rem 0;"><table class="rc-table" style="width:100%;border-collapse:collapse;"><thead>${head}</thead><tbody>${body}</tbody></table></div><p><br></p>`
+            `<div class="rc-table-wrap" style="overflow-x:auto;margin:1.2rem 0;"><table class="rc-table" style="width:100%;border-collapse:collapse;"><thead>${head}</thead><tbody>${body}</tbody></table></div><p><br></p>`,
           );
           break;
         }
@@ -563,7 +585,9 @@ export function RichTextEditor({
           if (sel) {
             exec("createLink", url);
           } else {
-            insertHTML(`<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--primary);text-decoration:underline;">${url}</a>&nbsp;`);
+            insertHTML(
+              `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--primary);text-decoration:underline;">${url}</a>&nbsp;`,
+            );
           }
           break;
         }
@@ -577,7 +601,7 @@ export function RichTextEditor({
           wrapSelection(
             '<code style="background:rgba(255,255,255,0.1);padding:0.15rem 0.4rem;border-radius:0.3rem;font-family:monospace;font-size:0.85em;color:var(--primary);">',
             "</code>",
-            "código"
+            "código",
           );
           break;
         }
@@ -586,7 +610,7 @@ export function RichTextEditor({
           break;
       }
     },
-    [exec, insertHTML, selectedHTML, wrapSelection]
+    [exec, insertHTML, selectedHTML, wrapSelection],
   );
 
   // Search & Replace Handlers
@@ -625,7 +649,7 @@ export function RichTextEditor({
       }
       return false;
     },
-    [emit]
+    [emit],
   );
 
   const handleReplaceAll = useCallback(
@@ -641,7 +665,7 @@ export function RichTextEditor({
       }
       return count;
     },
-    [emit]
+    [emit],
   );
 
   // Key Down & Shortcuts handling
@@ -723,8 +747,20 @@ export function RichTextEditor({
         onApplyFont={(font) => exec("fontName", font)}
         onApplyFontSize={(size) => applyStyleToTarget("font-size", size)}
         onApplyBlock={(block) => exec("formatBlock", `<${block}>`)}
-        onApplyColor={(col) => exec("foreColor", col)}
-        onApplyHighlight={(col) => applyStyleToTarget("background-color", col)}
+        onApplyColor={(col, isGradient) => {
+          if (isGradient) {
+            applyGradientText(col);
+          } else {
+            exec("foreColor", col);
+          }
+        }}
+        onApplyHighlight={(col, isGradient) => {
+          if (isGradient) {
+            applyStyleToTarget("background-image", col);
+          } else {
+            applyStyleToTarget("background-color", col);
+          }
+        }}
         onCopyStyle={handleCopyStyle}
         onPasteStyle={handlePasteStyle}
         onInsertComponent={handleInsertComponent}
@@ -825,7 +861,7 @@ export function RichTextEditor({
                   html: value,
                 },
                 null,
-                2
+                2,
               )}
               style={{ minHeight }}
               className="w-full resize-y bg-background font-mono text-xs leading-relaxed text-primary outline-none border border-border rounded-lg p-4"
@@ -949,7 +985,11 @@ export function RichTextEditor({
           const styleStr = Object.entries(styles)
             .map(([k, v]) => `${k}:${v}`)
             .join(";");
-          wrapSelection(`<${tag} class="${cls || ""}" style="${styleStr}">`, `</${tag}>`, "conteúdo");
+          wrapSelection(
+            `<${tag} class="${cls || ""}" style="${styleStr}">`,
+            `</${tag}>`,
+            "conteúdo",
+          );
         }}
         onApplyThemePreset={(preset) => {
           toast.success(`Preset "${preset}" aplicado ao editor!`);
@@ -1005,7 +1045,9 @@ export function RichTextEditor({
                 ? `Salvo às ${lastSavedTime}`
                 : "Pronto para edição"}
           </span>
-          <span className="hidden sm:inline">· Digite &ldquo;/&rdquo; no editor para comandos rápidos</span>
+          <span className="hidden sm:inline">
+            · Digite &ldquo;/&rdquo; no editor para comandos rápidos
+          </span>
         </div>
         <div className="flex items-center gap-3">
           <span>{value.length} caracteres</span>
