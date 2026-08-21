@@ -2,12 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import logoAsset from "@/assets/logo-tl.png.asset.json";
-import logoLocal from "@/assets/logo.png";
+import { SiteBackground } from "@/components/SiteBackground";
 import { RichContent } from "@/components/editor/RichContent";
 import { getSiteContent } from "@/lib/site.functions";
 import type { SiteContent } from "@/lib/site.functions";
 
-const logoImg = logoLocal || logoAsset.url;
+const logoImg = logoAsset.url;
 
 export const Route = createFileRoute("/regras/")({
   loader: () => getSiteContent(),
@@ -84,6 +84,7 @@ function RegrasPage() {
 
   return (
     <div className="relative min-h-screen font-body text-foreground">
+      <SiteBackground settings={cfg} />
       <header className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-md">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <Link to="/" className="flex items-center gap-3">
@@ -113,7 +114,7 @@ function RegrasPage() {
         </nav>
       </header>
 
-      <main className="mx-auto max-w-4xl px-5 pt-28 pb-24">
+      <main className="mx-auto max-w-7xl px-5 pt-28 pb-24">
         <div className="flex justify-center">
           <img
             src={logoImg}

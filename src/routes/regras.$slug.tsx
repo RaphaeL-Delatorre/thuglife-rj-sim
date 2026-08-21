@@ -2,12 +2,12 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 
 import logoAsset from "@/assets/logo-tl.png.asset.json";
-import logoLocal from "@/assets/logo.png";
+import { SiteBackground } from "@/components/SiteBackground";
 import { RichContent } from "@/components/editor/RichContent";
 import { getRuleCategory } from "@/lib/site.functions";
 import type { RuleCategoryPage } from "@/lib/site.functions";
 
-const logoImg = logoLocal || logoAsset.url;
+const logoImg = logoAsset.url;
 
 export const Route = createFileRoute("/regras/$slug")({
   loader: async ({ params }) => {
@@ -36,9 +36,10 @@ export const Route = createFileRoute("/regras/$slug")({
   component: CategoriaPage,
 });
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({ children, settings }: { children: React.ReactNode; settings?: Record<string, string> }) {
   return (
     <div className="relative min-h-screen font-body text-foreground">
+      <SiteBackground settings={settings ?? {}} />
       <header className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-md">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <Link to="/" className="flex items-center gap-3">
@@ -67,7 +68,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </nav>
       </header>
-      <main className="mx-auto max-w-4xl px-5 pt-28 pb-24">{children}</main>
+      <main className="mx-auto max-w-7xl px-5 pt-28 pb-24">{children}</main>
     </div>
   );
 }
@@ -149,12 +150,12 @@ function Secao({
 }
 
 function CategoriaPage() {
-  const { category, sections, rules }: RuleCategoryPage = Route.useLoaderData();
+  const { category, sections, rules, settings }: RuleCategoryPage = Route.useLoaderData();
   const [busca, setBusca] = useState("");
   if (!category) return <Fallback title="Categoria não encontrada" />;
 
   return (
-    <Shell>
+    <Shell settings={settings}>
       <Link to="/regras" className="text-xs font-bold uppercase tracking-[0.25em] text-primary">
         ← Regras
       </Link>
