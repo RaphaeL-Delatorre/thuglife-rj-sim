@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as RegrasIndexRouteImport } from './routes/regras.index'
 import { Route as RegrasSlugRouteImport } from './routes/regras.$slug'
+import { Route as ApiPublicMidiaSplatRouteImport } from './routes/api/public/midia.$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -45,6 +46,11 @@ const RegrasSlugRoute = RegrasSlugRouteImport.update({
   path: '/regras/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicMidiaSplatRoute = ApiPublicMidiaSplatRouteImport.update({
+  id: '/api/public/midia/$',
+  path: '/api/public/midia/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/regras/$slug': typeof RegrasSlugRoute
   '/regras/': typeof RegrasIndexRoute
+  '/api/public/midia/$': typeof ApiPublicMidiaSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/regras/$slug': typeof RegrasSlugRoute
   '/regras': typeof RegrasIndexRoute
+  '/api/public/midia/$': typeof ApiPublicMidiaSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -68,12 +76,25 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/regras/$slug': typeof RegrasSlugRoute
   '/regras/': typeof RegrasIndexRoute
+  '/api/public/midia/$': typeof ApiPublicMidiaSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/dashboard' | '/regras/$slug' | '/regras/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/regras/$slug'
+    | '/regras/'
+    | '/api/public/midia/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/regras/$slug' | '/regras'
+  to:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/regras/$slug'
+    | '/regras'
+    | '/api/public/midia/$'
   id:
     | '__root__'
     | '/'
@@ -82,6 +103,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/regras/$slug'
     | '/regras/'
+    | '/api/public/midia/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -90,6 +112,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   RegrasSlugRoute: typeof RegrasSlugRoute
   RegrasIndexRoute: typeof RegrasIndexRoute
+  ApiPublicMidiaSplatRoute: typeof ApiPublicMidiaSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -136,6 +159,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegrasSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/midia/$': {
+      id: '/api/public/midia/$'
+      path: '/api/public/midia/$'
+      fullPath: '/api/public/midia/$'
+      preLoaderRoute: typeof ApiPublicMidiaSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -156,6 +186,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   RegrasSlugRoute: RegrasSlugRoute,
   RegrasIndexRoute: RegrasIndexRoute,
+  ApiPublicMidiaSplatRoute: ApiPublicMidiaSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
