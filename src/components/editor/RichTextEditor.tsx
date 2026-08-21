@@ -1,10 +1,23 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import {
+  ArrowDown,
+  ArrowUp,
+  Clipboard,
+  Copy,
+  Paintbrush,
+  Palette,
+  Settings2,
+  Trash2,
+  X,
+} from "lucide-react";
 import { Toolbar } from "./Toolbar";
 import { InspectorPanel } from "./InspectorPanel";
 import { QuickSlashMenu } from "./QuickSlashMenu";
 import { SearchReplaceDialog } from "./SearchReplaceDialog";
 import { ExportImportDialog } from "./ExportImportDialog";
 import { CustomComponentsManager } from "./CustomComponentsManager";
+import { ColorPickerBody } from "./ColorPickerPopover";
 import { RichContent } from "./RichContent";
 import type { EditorViewMode, PreviewDevice, SelectionFormatState } from "./editor-types";
 import { toast } from "sonner";
@@ -34,6 +47,96 @@ function youtubeEmbed(url: string) {
   const m = url.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{6,})/);
   if (m) return `https://www.youtube.com/embed/${m[1]}`;
   return url;
+}
+
+/** Encontra o componente/bloco colorível mais EXTERNO a partir de um nó
+ *  (cards rc-*, tabelas, figuras, citações e, opcionalmente, listas simples).
+ *  Usado para recolorir e para detectar quando o Enter deve "escapar" do bloco.
+ *  `includeBareLists` fica ligado só na recoloração — o Enter precisa manter o
+ *  comportamento nativo dentro de listas comuns. */
+function colorableRootFrom(
+  node: Node | null,
+  stopAt: HTMLElement | null,
+  includeBareLists = false,
+): HTMLElement | null {
+  let outer: HTMLElement | null = null;
+  let cur: Node | null = node;
+  while (cur && cur !== stopAt) {
+    if (cur.nodeType === 1) {
+      const el = cur as HTMLElement;
+      const cls = typeof el.className === "string" ? el.className : "";
+      const tagMatch = includeBareLists
+        ? /^(FIGURE|BLOCKQUOTE|TABLE|UL|OL)$/.test(el.tagName)
+        : /^(FIGURE|BLOCKQUOTE|TABLE)$/.test(el.tagName);
+      if (/^rc-/i.test(cls.trim()) || tagMatch) {
+        outer = el;
+      }
+    }
+    cur = cur.parentNode;
+  }
+  return outer;
+}
+
+/** Cor HEX mais frequente entre os estilos inline do componente (o "accent"). */
+function dominantAccentOf(root: HTMLElement): string {
+  const styled: HTMLElement[] = [
+    root,
+    ...Array.from(root.querySelectorAll<HTMLElement>("[style]")),
+  ];
+  const counts = new Map<string, number>();
+  for (const el of styled) {
+    const st = el.getAttribute("style");
+    if (!st) continue;
+    for (const m of st.matchAll(/#[0-9a-fA-F]{6}/g)) {
+      const h = m[0].toLowerCase();
+      counts.set(h, (counts.get(h) ?? 0) + 1);
+    }
+  }
+  let accent = "";
+  let max = 0;
+  counts.forEach((count, hex) => {
+    if (count > max && hex !== "#000000" && hex !== "#ffffff") {
+      max = count;
+      accent = hex;
+    }
+  });
+  return accent;
+}
+
+/** Troca a cor de um componente inserido (borda, fundos, textos) preservando
+ *  os sufixos alfa (#ef444414 → #novo14). Suporta cor sólida ou gradiente.
+ *  Listas trocam apenas a cor dos marcadores via variáveis CSS. */
+function recolorComponent(root: HTMLElement, color: string, isGradient: boolean) {
+  const hex = (color.match(/#[0-9a-fA-F]{6}/)?.[0] ?? "").toLowerCase();
+  const tag = root.tagName;
+
+  if (tag === "UL" || tag === "OL") {
+    const marker = hex || "#8b5cf6";
+    root.style.setProperty("--rc-marker", marker);
+    root.style.setProperty("--rc-bullet-c", marker);
+    return;
+  }
+
+  const accent = dominantAccentOf(root);
+  if (accent && hex) {
+    const re = new RegExp(accent, "gi");
+    for (const el of Array.from(root.querySelectorAll<HTMLElement>("[style]")).concat([root])) {
+      const st = el.getAttribute("style");
+      if (!st || !st.toLowerCase().includes(accent)) continue;
+      el.setAttribute("style", st.replace(re, hex));
+    }
+  }
+
+  if (isGradient) {
+    root.style.background = color;
+    const bc = color.toLowerCase().match(/#[0-9a-f]{6}|rgba?\([^)]*\)/i)?.[0];
+    if (bc) root.style.borderColor = bc;
+  } else if (hex) {
+    root.style.borderColor = hex;
+    // Componentes sem accent HEX (ex.: accordion com var(--primary)) ganham a
+    // cor via variável CSS dos marcadores/títulos.
+    if (!accent) root.style.setProperty("--rc-marker", hex);
+  }
 }
 
 export function RichTextEditor({
@@ -71,6 +174,29 @@ export function RichTextEditor({
   const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
   const [targetContextNode, setTargetContextNode] = useState<HTMLElement | null>(null);
 
+  // Recolorização de componentes ("Cor do componente")
+  const [recolorTarget, setRecolorTarget] = useState<{
+    el: HTMLElement;
+    x: number;
+    y: number;
+  } | null>(null);
+
+  // Performance: debounce do emit durante a digitação + última posição do ponteiro
+  const emitTimer = useRef<number | null>(null);
+  const pointerPos = useRef<{ x: number; y: number }>({
+    x: Math.max(24, (typeof window !== "undefined" ? window.innerWidth : 800) / 2 - 160),
+    y: 140,
+  });
+
+  // Parágrafo separador padrão (Enter cria <p>, evita <div> solto dentro de cards)
+  useEffect(() => {
+    try {
+      document.execCommand("defaultParagraphSeparator", false, "p");
+    } catch {
+      /* noop */
+    }
+  }, []);
+
   // Sync internal editor content with incoming value
   useEffect(() => {
     const el = editorRef.current;
@@ -82,6 +208,10 @@ export function RichTextEditor({
 
   // Emit changes to parent
   const emit = useCallback(() => {
+    if (emitTimer.current) {
+      window.clearTimeout(emitTimer.current);
+      emitTimer.current = null;
+    }
     if (editorRef.current) {
       setSaveStatus("saving");
       const currentHtml = editorRef.current.innerHTML;
@@ -96,23 +226,67 @@ export function RichTextEditor({
     }
   }, [onChange]);
 
+  // Digitação dispara o emit com debounce curto para não travar em documentos grandes.
+  const scheduleEmit = useCallback(() => {
+    if (emitTimer.current) window.clearTimeout(emitTimer.current);
+    emitTimer.current = window.setTimeout(() => {
+      emitTimer.current = null;
+      emit();
+    }, 250);
+  }, [emit]);
+
+  useEffect(
+    () => () => {
+      if (emitTimer.current) window.clearTimeout(emitTimer.current);
+    },
+    [],
+  );
+
   // Selection range helpers
   const saveRange = useCallback(() => {
     const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0 && editorRef.current?.contains(sel.anchorNode)) {
+    if (
+      sel &&
+      sel.rangeCount > 0 &&
+      editorRef.current?.contains(sel.anchorNode) &&
+      sel.getRangeAt(0).startContainer.isConnected
+    ) {
       savedRange.current = sel.getRangeAt(0).cloneRange();
     }
+  }, []);
+
+  // Acompanha a seleção continuamente (inclusive durante o arraste do mouse),
+  // garantindo que botões da barra sempre apliquem na seleção correta.
+  useEffect(() => {
+    const onSelectionChange = () => saveRange();
+    document.addEventListener("selectionchange", onSelectionChange);
+    return () => document.removeEventListener("selectionchange", onSelectionChange);
+  }, [saveRange]);
+
+  // Range ativa preferindo a seleção viva da janela (fallback: última salva).
+  const getActiveRange = useCallback((): Range | null => {
+    const el = editorRef.current;
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && el?.contains(sel.anchorNode)) {
+      return sel.getRangeAt(0);
+    }
+    if (savedRange.current && savedRange.current.startContainer.isConnected) {
+      return savedRange.current;
+    }
+    return null;
   }, []);
 
   const restoreRange = useCallback(() => {
     const el = editorRef.current;
     if (!el) return;
-    el.focus();
+    el.focus({ preventScroll: true });
     const sel = window.getSelection();
     if (!sel) return;
-    if (savedRange.current) {
+    if (savedRange.current && savedRange.current.startContainer.isConnected) {
       sel.removeAllRanges();
       sel.addRange(savedRange.current);
+    } else {
+      savedRange.current = null;
     }
   }, []);
 
@@ -163,12 +337,12 @@ export function RichTextEditor({
   );
 
   const selectedHTML = useCallback(() => {
-    const sel = savedRange.current;
+    const sel = getActiveRange();
     if (!sel || sel.collapsed) return "";
     const div = document.createElement("div");
     div.appendChild(sel.cloneContents());
     return div.innerHTML;
-  }, []);
+  }, [getActiveRange]);
 
   const wrapSelection = useCallback(
     (openTag: string, closeTag: string, placeholder: string) => {
@@ -297,6 +471,33 @@ export function RichTextEditor({
     toast.success("Estilo aplicado com sucesso!");
     setCopiedStyles(null);
   }, [copiedStyles, applyBatchStyles]);
+
+  // Garante um parágrafo editável após o último elemento. Sem isso, o cursor
+  // fica "preso" dentro do último card/tabela/citação do documento.
+  const ensureTrailingParagraph = useCallback((): boolean => {
+    const el = editorRef.current;
+    if (!el) return false;
+    const last = el.lastElementChild;
+    if (last && !/^(P|UL|OL)$/i.test(last.tagName)) {
+      el.insertAdjacentHTML("beforeend", "<p><br></p>");
+      return true;
+    }
+    return false;
+  }, []);
+
+  // Abre o painel "Cor do componente" para o bloco sob o cursor/seleção.
+  const openRecolorFromSelection = useCallback(() => {
+    saveRange();
+    const range = getActiveRange();
+    const rootEl = colorableRootFrom(range?.startContainer ?? null, editorRef.current, true);
+    if (!rootEl) {
+      toast.error(
+        "Posicione o cursor dentro de um componente, tabela, lista ou citação para trocar a cor.",
+      );
+      return;
+    }
+    setRecolorTarget({ el: rootEl, x: pointerPos.current.x, y: pointerPos.current.y });
+  }, [getActiveRange, saveRange]);
 
   // Insert Rich RP Components
   const handleInsertComponent = useCallback(
@@ -677,6 +878,36 @@ export function RichTextEditor({
       return;
     }
 
+    // Enter no fim de um componente (card, tabela, citação…) cria um parágrafo
+    // FORA do bloco, em vez de aninhar conteúdo dentro dele.
+    if (e.key === "Enter" && !e.shiftKey && viewMode === "visual") {
+      const sel = window.getSelection();
+      if (sel && sel.isCollapsed && sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        const compRoot = colorableRootFrom(range.startContainer, editorRef.current);
+        if (compRoot) {
+          const tail = range.cloneRange();
+          tail.selectNodeContents(compRoot);
+          tail.setStart(range.endContainer, range.endOffset);
+          const hasMedia = tail.cloneContents().querySelector("img,iframe,video,table,hr");
+          if (!tail.toString().trim() && !hasMedia) {
+            e.preventDefault();
+            const p = document.createElement("p");
+            p.appendChild(document.createElement("br"));
+            compRoot.parentNode?.insertBefore(p, compRoot.nextSibling);
+            const nr = document.createRange();
+            nr.setStart(p, 0);
+            nr.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(nr);
+            savedRange.current = nr.cloneRange();
+            emit();
+            return;
+          }
+        }
+      }
+    }
+
     // Slash command detection
     if (e.key === "/") {
       const sel = window.getSelection();
@@ -761,6 +992,7 @@ export function RichTextEditor({
             applyStyleToTarget("background-color", col);
           }
         }}
+        onRecolorElement={openRecolorFromSelection}
         onCopyStyle={handleCopyStyle}
         onPasteStyle={handlePasteStyle}
         onInsertComponent={handleInsertComponent}
@@ -791,8 +1023,20 @@ export function RichTextEditor({
             aria-multiline="true"
             aria-label="Editor de Regras e Documentos"
             style={{ minHeight }}
-            onInput={emit}
+            onInput={scheduleEmit}
+            onFocus={() => {
+              if (ensureTrailingParagraph()) emit();
+              saveRange();
+              refreshSelectionState();
+            }}
+            onPointerDownCapture={(e) => {
+              pointerPos.current = { x: e.clientX, y: e.clientY };
+            }}
             onBlur={() => {
+              if (emitTimer.current) {
+                window.clearTimeout(emitTimer.current);
+                emitTimer.current = null;
+              }
               saveRange();
               emit();
             }}
@@ -801,6 +1045,25 @@ export function RichTextEditor({
             onMouseUp={() => {
               saveRange();
               refreshSelectionState();
+            }}
+            onClick={(e) => {
+              // Clique direto na área vazia do editor (abaixo do conteúdo):
+              // move o cursor para o último parágrafo em vez de ficar preso no card.
+              if (ensureTrailingParagraph()) {
+                emit();
+                const lastP = editorRef.current?.lastElementChild;
+                if (lastP) {
+                  const sel = window.getSelection();
+                  const nr = document.createRange();
+                  nr.selectNodeContents(lastP);
+                  nr.collapse(false);
+                  sel?.removeAllRanges();
+                  sel?.addRange(nr);
+                  savedRange.current = nr.cloneRange();
+                }
+                return;
+              }
+              if (e.target === editorRef.current) saveRange();
             }}
             onContextMenu={handleContextMenu}
             className="rich-content p-6 outline-none max-h-[70vh] overflow-y-auto leading-relaxed focus:ring-1 focus:ring-primary/40 rounded-b-xl"
@@ -886,32 +1149,54 @@ export function RichTextEditor({
       {contextMenuPos && (
         <div
           style={{ top: contextMenuPos.y, left: contextMenuPos.x }}
-          className="fixed z-50 w-52 rounded-xl border border-border bg-popover/95 backdrop-blur shadow-2xl p-1 text-xs animate-in fade-in"
+          className="fixed z-50 w-56 rounded-xl border border-border bg-popover/95 p-1 text-xs shadow-2xl backdrop-blur animate-in fade-in"
           onClick={closeContextMenu}
         >
-          <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border/50">
+          <div className="border-b border-border/50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             Ações do Elemento
           </div>
           <button
             type="button"
-            onClick={() => setInspectorOpen(true)}
-            className="flex w-full items-center gap-2 rounded px-2 py-1.5 hover:bg-secondary text-left font-medium"
+            onClick={() => {
+              const range = getActiveRange();
+              const el = colorableRootFrom(
+                targetContextNode === editorRef.current
+                  ? (range?.startContainer ?? null)
+                  : targetContextNode,
+                editorRef.current,
+                true,
+              );
+              if (!el) {
+                toast.error("Nenhum componente colorível neste ponto.");
+                return;
+              }
+              setContextMenuPos(null);
+              setRecolorTarget({ el, x: contextMenuPos.x, y: contextMenuPos.y });
+            }}
+            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left font-medium hover:bg-secondary"
           >
-            ⚙️ Personalizar no Painel
+            <Palette className="h-3.5 w-3.5 text-primary" /> Cor do componente…
+          </button>
+          <button
+            type="button"
+            onClick={() => setInspectorOpen(true)}
+            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left font-medium hover:bg-secondary"
+          >
+            <Settings2 className="h-3.5 w-3.5 text-muted-foreground" /> Personalizar no Painel
           </button>
           <button
             type="button"
             onClick={handleCopyStyle}
-            className="flex w-full items-center gap-2 rounded px-2 py-1.5 hover:bg-secondary text-left font-medium"
+            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left font-medium hover:bg-secondary"
           >
-            🖌️ Copiar Estilo
+            <Paintbrush className="h-3.5 w-3.5 text-muted-foreground" /> Copiar Estilo
           </button>
           <button
             type="button"
             onClick={handlePasteStyle}
-            className="flex w-full items-center gap-2 rounded px-2 py-1.5 hover:bg-secondary text-left font-medium"
+            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left font-medium hover:bg-secondary"
           >
-            📋 Colar Estilo
+            <Clipboard className="h-3.5 w-3.5 text-muted-foreground" /> Colar Estilo
           </button>
           <div className="my-1 border-t border-border/50" />
           <button
@@ -924,9 +1209,9 @@ export function RichTextEditor({
                 toast.success("Elemento duplicado com sucesso!");
               }
             }}
-            className="flex w-full items-center gap-2 rounded px-2 py-1.5 hover:bg-secondary text-left font-medium"
+            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left font-medium hover:bg-secondary"
           >
-            📑 Duplicar Bloco
+            <Copy className="h-3.5 w-3.5 text-muted-foreground" /> Duplicar Bloco
           </button>
           <button
             type="button"
@@ -939,9 +1224,9 @@ export function RichTextEditor({
                 }
               }
             }}
-            className="flex w-full items-center gap-2 rounded px-2 py-1.5 hover:bg-secondary text-left font-medium"
+            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left font-medium hover:bg-secondary"
           >
-            ↑ Mover para Cima
+            <ArrowUp className="h-3.5 w-3.5 text-muted-foreground" /> Mover para Cima
           </button>
           <button
             type="button"
@@ -954,9 +1239,9 @@ export function RichTextEditor({
                 }
               }
             }}
-            className="flex w-full items-center gap-2 rounded px-2 py-1.5 hover:bg-secondary text-left font-medium"
+            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left font-medium hover:bg-secondary"
           >
-            ↓ Mover para Baixo
+            <ArrowDown className="h-3.5 w-3.5 text-muted-foreground" /> Mover para Baixo
           </button>
           <div className="my-1 border-t border-border/50" />
           <button
@@ -968,12 +1253,56 @@ export function RichTextEditor({
                 toast.success("Elemento excluído.");
               }
             }}
-            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-destructive hover:bg-destructive/10 text-left font-medium"
+            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left font-medium text-destructive hover:bg-destructive/10"
           >
-            🗑️ Excluir Bloco
+            <Trash2 className="h-3.5 w-3.5" /> Excluir Bloco
           </button>
         </div>
       )}
+
+      {/* Painel flutuante "Cor do componente" */}
+      {recolorTarget &&
+        createPortal(
+          <>
+            <div className="fixed inset-0 z-[75]" onPointerDown={() => setRecolorTarget(null)} />
+            <div
+              className="fixed z-[76] w-[19.5rem] rounded-xl border border-border bg-popover p-3 shadow-2xl"
+              style={{
+                top: Math.min(recolorTarget.y + 8, window.innerHeight - 420),
+                left: Math.min(recolorTarget.x, window.innerWidth - 340),
+              }}
+            >
+              <div className="mb-2 flex items-center justify-between border-b border-border pb-2">
+                <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <Palette className="h-3.5 w-3.5 text-primary" /> Cor do Componente
+                </span>
+                <button
+                  type="button"
+                  aria-label="Fechar"
+                  onClick={() => setRecolorTarget(null)}
+                  className="rounded p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <p className="mb-2 text-[11px] leading-snug text-muted-foreground">
+                Troca todas as cores do componente de uma vez (bordas, fundos e textos). Escolha
+                sólida ou gradiente.
+              </p>
+              <ColorPickerBody
+                showGradientTab
+                initialColor="#8b5cf6"
+                onPick={(color, isGradient) => {
+                  // Aplica ao vivo e mantém o painel aberto para ajustar
+                  // opacidade/ângulo; feche pelo X ou clicando fora.
+                  recolorComponent(recolorTarget.el, color, Boolean(isGradient));
+                  emit();
+                }}
+              />
+            </div>
+          </>,
+          document.body,
+        )}
 
       {/* Property Inspector Panel */}
       <InspectorPanel

@@ -1,5 +1,67 @@
 import React, { useState } from "react";
 import {
+  AlignCenter,
+  AlignJustify,
+  AlignLeft,
+  AlignRight,
+  ArrowLeftRight,
+  Ban,
+  Baseline,
+  Bold,
+  Braces,
+  CheckCircle2,
+  Code,
+  Eye,
+  FileCode,
+  Film,
+  Hash,
+  Highlighter,
+  ImagePlus,
+  IndentDecrease,
+  IndentIncrease,
+  Info,
+  Italic,
+  Layers,
+  Lightbulb,
+  Link2,
+  ListChecks,
+  ListOrdered,
+  List,
+  Minus,
+  Monitor,
+  Paintbrush,
+  Palette,
+  PencilLine,
+  Plus,
+  Quote,
+  RemoveFormatting,
+  Scissors,
+  Scale,
+  Search,
+  SlidersHorizontal,
+  Smartphone,
+  Sparkle,
+  Sparkles,
+  Star,
+  Strikethrough,
+  Subscript,
+  Superscript,
+  Swords,
+  Tablet,
+  Tag,
+  Table,
+  Trash2,
+  TriangleAlert,
+  Underline,
+  Undo2,
+  Redo2,
+  Upload,
+  Download,
+  XCircle,
+  Zap,
+  ChevronDown,
+} from "lucide-react";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -32,6 +94,7 @@ interface ToolbarProps {
   onApplyBlock: (block: string) => void;
   onApplyColor: (color: string, isGradient?: boolean) => void;
   onApplyHighlight: (color: string, isGradient?: boolean) => void;
+  onRecolorElement: () => void;
   onCopyStyle: () => void;
   onPasteStyle: () => void;
   onInsertComponent: (type: string) => void;
@@ -61,6 +124,7 @@ export function Toolbar({
   onApplyBlock,
   onApplyColor,
   onApplyHighlight,
+  onRecolorElement,
   onCopyStyle,
   onPasteStyle,
   onInsertComponent,
@@ -78,12 +142,14 @@ export function Toolbar({
     title,
     active,
     disabled,
+    danger,
     children,
   }: {
     onClick: () => void;
     title: string;
     active?: boolean;
     disabled?: boolean;
+    danger?: boolean;
     children: React.ReactNode;
   }) => (
     <button
@@ -93,11 +159,13 @@ export function Toolbar({
       disabled={disabled}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
-      className={`flex h-8 min-w-8 items-center justify-center gap-1 rounded px-2 text-xs font-semibold transition-colors ${
+      className={`flex h-8 min-w-8 items-center justify-center gap-1 rounded px-2 transition-colors ${
         active
           ? "bg-primary text-primary-foreground shadow-sm"
-          : "text-foreground/80 hover:bg-secondary hover:text-foreground"
-      } ${disabled ? "opacity-40 cursor-not-allowed" : ""}`}
+          : danger
+            ? "text-destructive/90 hover:bg-destructive/10 hover:text-destructive"
+            : "text-foreground/80 hover:bg-secondary hover:text-foreground"
+      } ${disabled ? "cursor-not-allowed opacity-40" : ""}`}
     >
       {children}
     </button>
@@ -113,34 +181,51 @@ export function Toolbar({
     setCustomSizeOpen(false);
   };
 
-  const Divider = () => <span className="mx-1 h-5 w-px bg-border/80 shrink-0" />;
+  const Divider = () => <span className="mx-1 h-5 w-px shrink-0 bg-border/80" />;
+  const Ico = ({ children }: { children: React.ReactNode }) => (
+    <span className="[&>svg]:h-4 [&>svg]:w-4">{children}</span>
+  );
+  const MIcon = ({ children }: { children: React.ReactNode }) => (
+    <span className="mr-2 flex h-4 w-4 shrink-0 items-center justify-center text-primary/80 [&>svg]:h-4 [&>svg]:w-4">
+      {children}
+    </span>
+  );
 
   return (
     <div className="flex flex-col border-b border-border bg-secondary/40 backdrop-blur-sm">
       {/* Upper bar: View mode tabs, preview viewport, tools and inspector trigger */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/50 px-3 py-1.5 bg-background/40">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/50 bg-background/40 px-3 py-1.5">
         <div className="flex items-center gap-1">
           {/* Editor view modes */}
           <div className="flex rounded-lg bg-secondary/60 p-0.5 text-xs font-semibold">
             {(
               [
-                { id: "visual", label: "Visual (WYSIWYG)", icon: "✏️" },
-                { id: "preview", label: "Preview Real", icon: "👁️" },
-                { id: "html", label: "Código HTML", icon: "</>" },
-                { id: "json", label: "JSON Estrutura", icon: "🧩" },
+                { id: "visual", label: "Visual", icon: <PencilLine className="h-3.5 w-3.5" /> },
+                { id: "preview", label: "Preview", icon: <Eye className="h-3.5 w-3.5" /> },
+                { id: "html", label: "HTML", icon: <FileCode className="h-3.5 w-3.5" /> },
+                { id: "json", label: "JSON", icon: <Braces className="h-3.5 w-3.5" /> },
               ] as const
             ).map((vm) => (
               <button
                 key={vm.id}
                 type="button"
                 onClick={() => onSetViewMode(vm.id)}
+                title={
+                  vm.id === "visual"
+                    ? "Editor Visual (WYSIWYG)"
+                    : vm.id === "preview"
+                      ? "Pré-visualização real do site"
+                      : vm.id === "html"
+                        ? "Código-fonte HTML"
+                        : "Estrutura JSON do documento"
+                }
                 className={`flex items-center gap-1.5 rounded-md px-3 py-1 transition-colors ${
                   viewMode === vm.id
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <span>{vm.icon}</span>
+                {vm.icon}
                 <span>{vm.label}</span>
               </button>
             ))}
@@ -151,9 +236,9 @@ export function Toolbar({
             <div className="ml-2 flex items-center gap-1 rounded-md bg-secondary/80 p-0.5 text-xs">
               {(
                 [
-                  { id: "desktop", label: "Desktop", icon: "💻" },
-                  { id: "tablet", label: "Tablet", icon: "📱" },
-                  { id: "mobile", label: "Celular", icon: "📲" },
+                  { id: "desktop", label: "Desktop", icon: <Monitor className="h-3.5 w-3.5" /> },
+                  { id: "tablet", label: "Tablet", icon: <Tablet className="h-3.5 w-3.5" /> },
+                  { id: "mobile", label: "Celular", icon: <Smartphone className="h-3.5 w-3.5" /> },
                 ] as const
               ).map((dev) => (
                 <button
@@ -166,7 +251,7 @@ export function Toolbar({
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  <span>{dev.icon}</span>
+                  {dev.icon}
                   <span className="hidden sm:inline">{dev.label}</span>
                 </button>
               ))}
@@ -177,7 +262,9 @@ export function Toolbar({
         {/* Action icons */}
         <div className="flex items-center gap-1">
           <TB title="Localizar e Substituir (Ctrl+F)" onClick={onOpenSearch}>
-            🔍
+            <Ico>
+              <Search />
+            </Ico>
           </TB>
           <DocumentOutline
             html={htmlContent}
@@ -185,42 +272,65 @@ export function Toolbar({
             onJumpTo={onJumpToOutline}
           />
           <TB title="Meus Componentes Salvos" onClick={onOpenCustomComponents}>
-            ⭐
+            <Ico>
+              <Star />
+            </Ico>
           </TB>
           <TB title="Exportar Documento" onClick={onOpenExport}>
-            📤
+            <Ico>
+              <Upload />
+            </Ico>
           </TB>
           <TB title="Importar Documento" onClick={onOpenImport}>
-            📥
+            <Ico>
+              <Download />
+            </Ico>
           </TB>
+          <TB title="Limpar todo o documento" danger onClick={onClearDocument}>
+            <Ico>
+              <Trash2 />
+            </Ico>
+          </TB>
+          <span className="mx-0.5 h-5 w-px bg-border/60" />
           <TB
             title="Painel de Propriedades Visuais (Ajustes Finos)"
             active={inspectorOpen}
             onClick={onToggleInspector}
           >
-            ⚙️ <span className="hidden md:inline font-bold">Propriedades</span>
+            <Ico>
+              <SlidersHorizontal />
+            </Ico>
+            <span className="hidden font-bold md:inline">Propriedades</span>
           </TB>
         </div>
       </div>
 
       {/* Main Editing Toolbar */}
-      <div className="flex flex-wrap items-center gap-1 p-2 overflow-x-auto scrollbar-thin">
+      <div className="scrollbar-thin flex flex-wrap items-center gap-1 overflow-x-auto p-2">
         {/* History / Undo / Redo / Format Painter */}
         <TB title="Desfazer (Ctrl+Z)" onClick={() => onExecCommand("undo")}>
-          ↶
+          <Ico>
+            <Undo2 />
+          </Ico>
         </TB>
         <TB title="Refazer (Ctrl+Y)" onClick={() => onExecCommand("redo")}>
-          ↷
+          <Ico>
+            <Redo2 />
+          </Ico>
         </TB>
         <TB
           title={hasCopiedStyle ? "Colar Estilo Copiado" : "Copiar Estilo do Elemento Selecionado"}
           active={hasCopiedStyle}
           onClick={hasCopiedStyle ? onPasteStyle : onCopyStyle}
         >
-          🖌️
+          <Ico>
+            <Paintbrush />
+          </Ico>
         </TB>
-        <TB title="Limpar Formatação" onClick={() => onExecCommand("removeFormat")}>
-          Tx
+        <TB title="Limpar formatação da seleção" onClick={() => onExecCommand("removeFormat")}>
+          <Ico>
+            <RemoveFormatting />
+          </Ico>
         </TB>
 
         <Divider />
@@ -231,37 +341,51 @@ export function Toolbar({
           active={selectionState.bold}
           onClick={() => onExecCommand("bold")}
         >
-          <strong>B</strong>
+          <Ico>
+            <Bold />
+          </Ico>
         </TB>
         <TB
           title="Itálico (Ctrl+I)"
           active={selectionState.italic}
           onClick={() => onExecCommand("italic")}
         >
-          <em>I</em>
+          <Ico>
+            <Italic />
+          </Ico>
         </TB>
         <TB
           title="Sublinhado (Ctrl+U)"
           active={selectionState.underline}
           onClick={() => onExecCommand("underline")}
         >
-          <span className="underline">U</span>
+          <Ico>
+            <Underline />
+          </Ico>
         </TB>
         <TB
           title="Tachado"
           active={selectionState.strike}
           onClick={() => onExecCommand("strikeThrough")}
         >
-          <span className="line-through">S</span>
+          <Ico>
+            <Strikethrough />
+          </Ico>
         </TB>
         <TB title="Sobrescrito" onClick={() => onExecCommand("superscript")}>
-          x²
+          <Ico>
+            <Superscript />
+          </Ico>
         </TB>
         <TB title="Subscrito" onClick={() => onExecCommand("subscript")}>
-          x₂
+          <Ico>
+            <Subscript />
+          </Ico>
         </TB>
         <TB title="Código inline" onClick={() => onInsertComponent("code-inline")}>
-          &lt;/&gt;
+          <Ico>
+            <Code />
+          </Ico>
         </TB>
 
         <Divider />
@@ -271,7 +395,7 @@ export function Toolbar({
           title="Família da Fonte"
           value=""
           onChange={(e) => e.target.value && onApplyFont(e.target.value)}
-          className="h-8 rounded border border-border bg-background px-2 text-xs text-foreground outline-none focus:border-primary w-28 md:w-36"
+          className="h-8 w-28 rounded border border-border bg-background px-2 text-xs text-foreground outline-none focus:border-primary md:w-36"
         >
           <option value="">Fonte...</option>
           {FONTS.map((f) => (
@@ -286,7 +410,7 @@ export function Toolbar({
           title="Tamanho da Fonte"
           value=""
           onChange={(e) => e.target.value && onApplyFontSize(e.target.value)}
-          className="h-8 rounded border border-border bg-background px-2 text-xs text-foreground outline-none focus:border-primary w-20"
+          className="h-8 w-20 rounded border border-border bg-background px-2 text-xs text-foreground outline-none focus:border-primary"
         >
           <option value="">Tam...</option>
           {FONT_SIZES.map((s) => (
@@ -338,7 +462,9 @@ export function Toolbar({
               <Button type="button" size="sm" className="w-full text-xs" onClick={applyCustomSize}>
                 Aplicar tamanho
               </Button>
-              <p className="text-[10px] text-muted-foreground">Valores de 8 a 200 pixels.</p>
+              <p className="text-[10px] text-muted-foreground">
+                Valores de 8 a 200 pixels · selecione o texto antes de aplicar.
+              </p>
             </div>
           </PopoverContent>
         </Popover>
@@ -348,7 +474,7 @@ export function Toolbar({
           title="Hierarquia de Bloco (H1-H6, P, etc.)"
           value=""
           onChange={(e) => e.target.value && onApplyBlock(e.target.value)}
-          className="h-8 rounded border border-border bg-background px-2 text-xs text-foreground outline-none focus:border-primary w-28"
+          className="h-8 w-28 rounded border border-border bg-background px-2 text-xs text-foreground outline-none focus:border-primary"
         >
           <option value="">Bloco...</option>
           {BLOCKS.map((b) => (
@@ -365,7 +491,12 @@ export function Toolbar({
           title="Cor do Texto"
           showGradientTab
           onPick={onApplyColor}
-          label={<span className="font-bold text-xs">A●</span>}
+          label={
+            <span className="flex flex-col items-center leading-none">
+              <Baseline className="h-4 w-4" />
+              <span className="mt-0.5 h-1 w-3 rounded-full bg-gradient-to-r from-violet-400 to-pink-400" />
+            </span>
+          }
         />
 
         {/* Background / Highlight Color Popover */}
@@ -373,42 +504,82 @@ export function Toolbar({
           title="Cor de Fundo do Texto"
           showGradientTab
           onPick={onApplyHighlight}
-          label={<span className="font-bold text-xs">▨</span>}
+          label={
+            <Ico>
+              <Highlighter />
+            </Ico>
+          }
         />
+
+        {/* Component Recolor */}
+        <TB
+          title="Cor do Componente (tabela, listas, cards, divisores…)"
+          onClick={onRecolorElement}
+        >
+          <Ico>
+            <Palette />
+          </Ico>
+        </TB>
 
         <Divider />
 
         {/* Alignment */}
         <TB title="Alinhar à Esquerda" onClick={() => onExecCommand("justifyLeft")}>
-          ⇤
+          <Ico>
+            <AlignLeft />
+          </Ico>
         </TB>
-        <TB title="Alinhar ao Centro" onClick={() => onExecCommand("justifyCenter")}>
-          ≡
+        <TB title="Centralizar" onClick={() => onExecCommand("justifyCenter")}>
+          <Ico>
+            <AlignCenter />
+          </Ico>
         </TB>
         <TB title="Alinhar à Direita" onClick={() => onExecCommand("justifyRight")}>
-          ⇥
+          <Ico>
+            <AlignRight />
+          </Ico>
         </TB>
         <TB title="Justificar" onClick={() => onExecCommand("justifyFull")}>
-          ☰
+          <Ico>
+            <AlignJustify />
+          </Ico>
         </TB>
 
         <Divider />
 
         {/* Lists & Indent */}
-        <TB title="Lista com Marcadores" onClick={() => onExecCommand("insertUnorderedList")}>
-          •—
+        <TB
+          title="Lista com Marcadores"
+          active={selectionState.bulletList}
+          onClick={() => onExecCommand("insertUnorderedList")}
+        >
+          <Ico>
+            <List />
+          </Ico>
         </TB>
-        <TB title="Lista Numerada" onClick={() => onExecCommand("insertOrderedList")}>
-          1—
+        <TB
+          title="Lista Numerada"
+          active={selectionState.numberedList}
+          onClick={() => onExecCommand("insertOrderedList")}
+        >
+          <Ico>
+            <ListOrdered />
+          </Ico>
         </TB>
         <TB title="Checklist" onClick={() => onInsertComponent("checklist")}>
-          ☑—
+          <Ico>
+            <ListChecks />
+          </Ico>
         </TB>
         <TB title="Diminuir Recuo" onClick={() => onExecCommand("outdent")}>
-          ⇠
+          <Ico>
+            <IndentDecrease />
+          </Ico>
         </TB>
         <TB title="Aumentar Recuo" onClick={() => onExecCommand("indent")}>
-          ⇢
+          <Ico>
+            <IndentIncrease />
+          </Ico>
         </TB>
 
         <Divider />
@@ -418,112 +589,173 @@ export function Toolbar({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex h-8 items-center gap-1.5 rounded bg-primary/20 border border-primary/50 px-2.5 text-xs font-bold text-primary hover:bg-primary hover:text-primary-foreground transition-all"
+              className="flex h-8 items-center gap-1.5 rounded border border-primary/50 bg-primary/20 px-2.5 text-xs font-bold text-primary transition-all hover:bg-primary hover:text-primary-foreground"
             >
-              <span>+ Adicionar</span>
-              <span className="text-[10px]">▼</span>
+              <Plus className="h-4 w-4" />
+              <span>Adicionar</span>
+              <ChevronDown className="h-3 w-3 opacity-70" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-64 max-h-96 overflow-y-auto z-50 bg-popover/95 backdrop-blur border border-border">
-            <DropdownMenuLabel className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
-              Componentes de Regras & RP
+          <DropdownMenuContent className="z-50 max-h-96 w-64 overflow-y-auto border border-border bg-popover/95 backdrop-blur">
+            <DropdownMenuLabel className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
+              Regras &amp; RP
             </DropdownMenuLabel>
             <DropdownMenuItem onClick={() => onInsertComponent("rule")}>
-              <span className="mr-2">⚖️</span>
+              <MIcon>
+                <Scale />
+              </MIcon>
               <div className="flex flex-col">
-                <span className="font-bold text-xs">Item de Regra (Código + Penalidade)</span>
+                <span className="text-xs font-bold">Item de Regra (Código + Penalidade)</span>
                 <span className="text-[10px] text-muted-foreground">
                   Ex: 1.1 Metagaming + Status
                 </span>
               </div>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("penalty")}>
-              <span className="mr-2">🛑</span>
+              <MIcon>
+                <Ban />
+              </MIcon>
               <div className="flex flex-col">
-                <span className="font-bold text-xs">Cartão de Penalidade</span>
+                <span className="text-xs font-bold">Cartão de Penalidade</span>
                 <span className="text-[10px] text-muted-foreground">
                   Banimento, Advertência, Perda
                 </span>
               </div>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("compare")}>
-              <span className="mr-2">⚖️</span>
+              <MIcon>
+                <ArrowLeftRight />
+              </MIcon>
               <div className="flex flex-col">
-                <span className="font-bold text-xs">Comparativo (Permitido vs Proibido)</span>
+                <span className="text-xs font-bold">Comparativo (Permitido vs Proibido)</span>
                 <span className="text-[10px] text-muted-foreground">Grid em duas colunas</span>
               </div>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuLabel className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
-              Cards & Alertas
+            <DropdownMenuLabel className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
+              Cards &amp; Alertas
             </DropdownMenuLabel>
             <DropdownMenuItem onClick={() => onInsertComponent("card-info")}>
-              <span className="mr-2">🔵</span> Card de Informação
+              <MIcon>
+                <Info />
+              </MIcon>
+              Card de Informação
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("card-success")}>
-              <span className="mr-2">🟢</span> Card de Sucesso / Permitido
+              <MIcon>
+                <CheckCircle2 />
+              </MIcon>
+              Card de Sucesso / Permitido
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("card-warning")}>
-              <span className="mr-2">🟡</span> Card de Aviso / Atenção
+              <MIcon>
+                <TriangleAlert />
+              </MIcon>
+              Card de Aviso / Atenção
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("card-danger")}>
-              <span className="mr-2">🔴</span> Card de Perigo / Proibido
+              <MIcon>
+                <XCircle />
+              </MIcon>
+              Card de Perigo / Proibido
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("card-critical")}>
-              <span className="mr-2">🛑</span> Card Crítico / Importante
+              <MIcon>
+                <Zap />
+              </MIcon>
+              Card Crítico / Importante
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("card-tip")}>
-              <span className="mr-2">💡</span> Card de Dica de Roleplay
+              <MIcon>
+                <Lightbulb />
+              </MIcon>
+              Card de Dica de Roleplay
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuLabel className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
-              Estruturas & Layout
+            <DropdownMenuLabel className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
+              Estruturas &amp; Layout
             </DropdownMenuLabel>
             <DropdownMenuItem onClick={() => onInsertComponent("accordion")}>
-              <span className="mr-2">📑</span> Seção Expansível / Accordion
+              <MIcon>
+                <Layers />
+              </MIcon>
+              Seção Expansível / Accordion
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("table")}>
-              <span className="mr-2">▦</span> Tabela Visual
+              <MIcon>
+                <Table />
+              </MIcon>
+              Tabela Visual
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("stat")}>
-              <span className="mr-2">#</span> Número em Destaque (Estatística)
+              <MIcon>
+                <Hash />
+              </MIcon>
+              Número em Destaque (Estatística)
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("stat-battle")}>
-              <span className="mr-2">⚔️</span> Destaque: Bandidos vs Polícia
+              <MIcon>
+                <Swords />
+              </MIcon>
+              Destaque: Bandidos vs Polícia
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("badge")}>
-              <span className="mr-2">🏷️</span> Etiqueta / Badge
+              <MIcon>
+                <Tag />
+              </MIcon>
+              Etiqueta / Badge
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("divider-glow")}>
-              <span className="mr-2">━</span> Divisor Luminoso Neon
+              <MIcon>
+                <Sparkles />
+              </MIcon>
+              Divisor Luminoso Neon
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("divider-icon")}>
-              <span className="mr-2">✦</span> Divisor com Ícone Central
+              <MIcon>
+                <Sparkle />
+              </MIcon>
+              Divisor com Ícone Central
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("quote")}>
-              <span className="mr-2">💬</span> Bloco de Citação com Autor
+              <MIcon>
+                <Quote />
+              </MIcon>
+              Bloco de Citação com Autor
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuLabel className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
-              Mídia & Links
+            <DropdownMenuLabel className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
+              Mídia &amp; Links
             </DropdownMenuLabel>
             <DropdownMenuItem onClick={() => onInsertComponent("image")}>
-              <span className="mr-2">🖼️</span> Inserir Imagem
+              <MIcon>
+                <ImagePlus />
+              </MIcon>
+              Inserir Imagem
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("video")}>
-              <span className="mr-2">🎬</span> Inserir Vídeo (YouTube/MP4)
+              <MIcon>
+                <Film />
+              </MIcon>
+              Inserir Vídeo (YouTube/MP4)
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("link")}>
-              <span className="mr-2">🔗</span> Inserir Link
+              <MIcon>
+                <Link2 />
+              </MIcon>
+              Inserir Link
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onInsertComponent("pagebreak")}>
-              <span className="mr-2">⤓</span> Quebra de Página
+              <MIcon>
+                <Scissors />
+              </MIcon>
+              Quebra de Página
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -535,16 +767,24 @@ export function Toolbar({
 
         {/* Direct quick inserts */}
         <TB title="Inserir Link" onClick={() => onInsertComponent("link")}>
-          🔗
+          <Ico>
+            <Link2 />
+          </Ico>
         </TB>
         <TB title="Inserir Imagem" onClick={() => onInsertComponent("image")}>
-          🖼️
+          <Ico>
+            <ImagePlus />
+          </Ico>
         </TB>
         <TB title="Inserir Tabela" onClick={() => onInsertComponent("table")}>
-          ▦
+          <Ico>
+            <Table />
+          </Ico>
         </TB>
         <TB title="Divisor Decorativo" onClick={() => onInsertComponent("divider-icon")}>
-          —✦—
+          <Ico>
+            <Minus />
+          </Ico>
         </TB>
       </div>
     </div>

@@ -278,7 +278,10 @@
   margin-bottom: 0.4rem;
 }
 .rich-content li::marker {
-  color: var(--primary);
+  color: var(--rc-marker, var(--primary));
+}
+.rich-content .rc-accordion summary {
+  color: var(--rc-marker, var(--primary));
 }
 .rich-content blockquote {
   border-left: 3px solid var(--primary);
@@ -393,34 +396,22 @@
   color: var(--primary);
   font-weight: 700;
 }
+/* Checklist: o "✓" é desenhado como background-image (sem flex/pseudo-elemento)
+   para não quebrar cursor, seleção e digitação dentro do contentEditable. */
 .rich-content .rc-checklist {
   list-style: none;
   margin-left: 0;
 }
 .rich-content .rc-checklist li {
-  align-items: center;
-  background: oklch(0.19 0.01 20 / 0.6);
+  background-color: oklch(0.19 0.01 20 / 0.6);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='2' y='2' width='20' height='20' rx='5' fill='%2322c55e2e' stroke='%2322c55e' stroke-width='2'/%3E%3Cpath d='m7.5 12.5 3 3 6-6.5' fill='none' stroke='%2322c55e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-position: left 0.6rem top 0.62rem;
+  background-repeat: no-repeat;
+  background-size: 1.05rem 1.05rem;
   border: 1px solid var(--border);
   border-radius: 0.5rem;
-  column-gap: 0.65rem;
-  display: flex;
   margin-bottom: 0.5rem;
-  padding: 0.6rem 0.8rem;
-}
-.rich-content .rc-checklist li::before {
-  content: "✓";
-  color: oklch(0.78 0.2 150);
-  background: oklch(0.78 0.2 150 / 0.12);
-  border: 1.5px solid oklch(0.78 0.2 150);
-  border-radius: 0.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 0.72rem;
-  font-weight: 700;
-  height: 1.05rem;
-  width: 1.05rem;
+  padding: 0.6rem 0.8rem 0.6rem 2.35rem;
 }
 /* Marcadores personalizados */
 .rich-content ul.rc-bullets {
@@ -433,7 +424,7 @@
 }
 .rich-content ul.rc-bullets > li::before {
   content: var(--rc-bullet, "•");
-  color: var(--primary);
+  color: var(--rc-bullet-c, var(--primary));
   left: 0;
   line-height: inherit;
   position: absolute;
