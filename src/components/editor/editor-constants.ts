@@ -87,14 +87,14 @@ export const SWATCH_COLORS = [
 ];
 
 export const NEON_PRESETS = [
-  { name: "Neon Roxo", color: "#8b5cf6", shadow: "0 0 10px #8b5cf6, 0 0 25px rgba(139,92,246,0.6)" },
-  { name: "Neon Azul", color: "#3b82f6", shadow: "0 0 10px #3b82f6, 0 0 25px rgba(59,130,246,0.6)" },
-  { name: "Neon Ciano", color: "#06b6d4", shadow: "0 0 10px #06b6d4, 0 0 25px rgba(6,182,212,0.6)" },
-  { name: "Neon Verde", color: "#22c55e", shadow: "0 0 10px #22c55e, 0 0 25px rgba(34,197,94,0.6)" },
-  { name: "Neon Vermelho", color: "#ef4444", shadow: "0 0 10px #ef4444, 0 0 25px rgba(239,68,68,0.6)" },
-  { name: "Neon Rosa", color: "#ec4899", shadow: "0 0 10px #ec4899, 0 0 25px rgba(236,72,153,0.6)" },
-  { name: "Neon Dourado", color: "#eab308", shadow: "0 0 10px #eab308, 0 0 25px rgba(234,179,8,0.6)" },
-  { name: "Neon Branco", color: "#ffffff", shadow: "0 0 10px #ffffff, 0 0 25px rgba(255,255,255,0.7)" },
+  { name: "Neon Roxo", color: "#8b5cf6", shadow: "0 0 1px #8b5cf6, 0 0 7px rgba(139,92,246,0.7)" },
+  { name: "Neon Azul", color: "#3b82f6", shadow: "0 0 1px #3b82f6, 0 0 7px rgba(59,130,246,0.7)" },
+  { name: "Neon Ciano", color: "#06b6d4", shadow: "0 0 1px #06b6d4, 0 0 7px rgba(6,182,212,0.7)" },
+  { name: "Neon Verde", color: "#22c55e", shadow: "0 0 1px #22c55e, 0 0 7px rgba(34,197,94,0.7)" },
+  { name: "Neon Vermelho", color: "#ef4444", shadow: "0 0 1px #ef4444, 0 0 7px rgba(239,68,68,0.7)" },
+  { name: "Neon Rosa", color: "#ec4899", shadow: "0 0 1px #ec4899, 0 0 7px rgba(236,72,153,0.7)" },
+  { name: "Neon Dourado", color: "#eab308", shadow: "0 0 1px #eab308, 0 0 7px rgba(234,179,8,0.7)" },
+  { name: "Neon Branco", color: "#ffffff", shadow: "0 0 1px #ffffff, 0 0 7px rgba(255,255,255,0.75)" },
 ];
 
 export const GRADIENT_PRESETS = [

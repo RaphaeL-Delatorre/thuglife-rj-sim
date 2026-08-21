@@ -26,7 +26,7 @@ export const getSiteContent = createServerFn({ method: "GET" }).handler(async ()
     db.from("site_settings").select("key, value").eq("key", "geral").maybeSingle(),
     db.from("site_stats").select("id, value, label, sub, sort_order").order("sort_order"),
     db.from("requirements").select("id, num, title, description, sort_order").order("sort_order"),
-    db.from("news").select("id, tag, title, body, sort_order").order("sort_order"),
+    db.from("news").select("id, tag, title, body, media_url, media_type, sort_order").order("sort_order"),
     db.from("faqs").select("id, question, answer, sort_order").order("sort_order"),
     db.from("rule_categories").select("id, name, slug, icon, subtitle, description, content_html, intro_html, outro_html, published, sort_order").eq("published", true).order("sort_order"),
     db.from("rule_sections").select("id, block, title, icon, body_html, category_id, sort_order").order("sort_order"),

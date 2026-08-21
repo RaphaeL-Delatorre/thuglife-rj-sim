@@ -55,8 +55,8 @@ export function InspectorPanel({
   // Glow state
   const [glowEnabled, setGlowEnabled] = useState(false);
   const [glowColor, setGlowColor] = useState("#8b5cf6");
-  const [glowBlur, setGlowBlur] = useState(12);
-  const [glowLayers, setGlowLayers] = useState(2);
+  const [glowBlur, setGlowBlur] = useState(6);
+  const [glowLayers, setGlowLayers] = useState(1);
 
   // Stroke / Outline state
   const [strokeEnabled, setStrokeEnabled] = useState(false);
@@ -99,11 +99,16 @@ export function InspectorPanel({
       onApplyStyle("text-shadow", "none");
       return;
     }
-    const shadows = [];
-    for (let i = 1; i <= layers; i++) {
-      shadows.push(`0 0 ${blur * i}px ${color}`);
-    }
-    onApplyStyle("text-shadow", shadows.join(", "));
+    // Camadas enormes se sobrepunham ao preenchimento das letras e deixavam o texto borrado.
+    // Mantemos um halo curto, com um núcleo nítido, para o neon continuar legível.
+    const softBlur = Math.max(2, Math.min(14, blur));
+    const shadows = [`0 0 1px ${color}`, `0 0 ${softBlur}px ${color}`];
+    if (layers > 1) shadows.push(`0 0 ${Math.min(18, softBlur + 4)}px ${color}`);
+    onApplyBatchStyles({
+      "text-shadow": shadows.join(", "),
+      filter: "none",
+      "text-rendering": "geometricPrecision",
+    });
   };
 
   const handleApplyStroke = (enabled: boolean, width: number, color: string) => {
@@ -460,7 +465,7 @@ export function InspectorPanel({
                   <input
                     type="range"
                     min="2"
-                    max="40"
+                    max="14"
                     value={glowBlur}
                     onChange={(e) => {
                       const v = Number(e.target.value);
@@ -479,7 +484,7 @@ export function InspectorPanel({
                   <input
                     type="range"
                     min="1"
-                    max="4"
+                    max="2"
                     value={glowLayers}
                     onChange={(e) => {
                       const v = Number(e.target.value);
@@ -494,11 +499,14 @@ export function InspectorPanel({
                   className="rounded-lg border border-border/80 p-3 text-center text-sm font-bold"
                   style={{
                     color: glowColor,
-                    textShadow: `0 0 ${glowBlur}px ${glowColor}, 0 0 ${glowBlur * 2}px ${glowColor}`,
+                    textShadow: `0 0 1px ${glowColor}, 0 0 ${Math.min(14, glowBlur)}px ${glowColor}`,
                   }}
                 >
                   Texto com Brilho Neon Ativado
                 </div>
+                <Button type="button" variant="outline" className="w-full" onClick={() => handleApplyGlow(false, glowColor, glowBlur, glowLayers)}>
+                  Remover brilho do texto selecionado
+                </Button>
               </div>
             )}
           </div>

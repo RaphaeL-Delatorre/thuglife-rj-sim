@@ -22,7 +22,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Thug Life RJ — GTA RP do Rio há mais de 10 anos" },
       {
         property: "og:description",
-        content: "Entre na cidade mais viva do FiveM brasileiro. Mais de 10 anos de história no Rio.",
+        content:
+          "Entre na cidade mais viva do FiveM brasileiro. Mais de 10 anos de história no Rio.",
       },
       { property: "og:url", content: "/" },
     ],
@@ -34,7 +35,8 @@ export const Route = createFileRoute("/")({
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "Thug Life RJ",
-          description: "Servidor brasileiro de GTA RP (FiveM) com temática do Rio de Janeiro, no ar há mais de 10 anos.",
+          description:
+            "Servidor brasileiro de GTA RP (FiveM) com temática do Rio de Janeiro, no ar há mais de 10 anos.",
           foundingDate: "2015",
         }),
       },
@@ -49,7 +51,15 @@ const statsFallback = [
   { value: "+500", label: "Players", sub: "simultâneos" },
 ];
 
-const newsFallback = [
+type NewsItem = {
+  tag: string;
+  title: string;
+  text: string;
+  mediaUrl?: string;
+  mediaType?: string | null;
+};
+
+const newsFallback: NewsItem[] = [
   {
     tag: "Servidor",
     title: "Novo sistema de rachas noturnos na Zona Sul",
@@ -68,10 +78,26 @@ const newsFallback = [
 ];
 
 const requisitosFallback = [
-  { n: "01", t: "Ter 16 anos ou mais", d: "Contas verificadas no Discord com idade mínima declarada." },
-  { n: "02", t: "GTA V Original + FiveM", d: "Cópia legítima na Steam, Epic ou Rockstar Launcher + FiveM instalado." },
-  { n: "03", t: "Microfone funcionando", d: "Todo o roleplay acontece por voz. Áudio limpo é obrigatório." },
-  { n: "04", t: "Ler as regras", d: "Whitelist só é liberada após a prova de regras dentro do Discord." },
+  {
+    n: "01",
+    t: "Ter 16 anos ou mais",
+    d: "Contas verificadas no Discord com idade mínima declarada.",
+  },
+  {
+    n: "02",
+    t: "GTA V Original + FiveM",
+    d: "Cópia legítima na Steam, Epic ou Rockstar Launcher + FiveM instalado.",
+  },
+  {
+    n: "03",
+    t: "Microfone funcionando",
+    d: "Todo o roleplay acontece por voz. Áudio limpo é obrigatório.",
+  },
+  {
+    n: "04",
+    t: "Ler as regras",
+    d: "Whitelist só é liberada após a prova de regras dentro do Discord.",
+  },
 ];
 
 const DISCORD_URL = "https://discord.gg/thugliferj";
@@ -119,6 +145,55 @@ const faqFallback = [
   },
 ];
 
+function youtubeEmbed(url: string) {
+  const match = url.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{6,})/);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}
+
+function NewsMedia({
+  url,
+  type,
+  title,
+}: {
+  url: string;
+  type?: string | null | undefined;
+  title: string;
+}) {
+  if (!url) return null;
+  const isVideo =
+    type === "video" ||
+    /\.(mp4|webm|ogg|mov|m4v)(?:\?|$)/i.test(url) ||
+    /youtu\.be\/|youtube\.com\//i.test(url);
+  if (!isVideo) {
+    return (
+      <img
+        src={url}
+        alt={title}
+        className="h-52 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        loading="lazy"
+      />
+    );
+  }
+
+  const embedUrl = youtubeEmbed(url);
+  return embedUrl ? (
+    <div className="aspect-video bg-black">
+      <iframe
+        src={embedUrl}
+        title={title}
+        className="h-full w-full border-0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
+    </div>
+  ) : (
+    <video className="h-52 w-full bg-black object-cover" controls playsInline preload="metadata">
+      <source src={url} />
+      Seu navegador não suporta este vídeo.
+    </video>
+  );
+}
+
 function Index() {
   const [open, setOpen] = useState<number | null>(0);
   const content: SiteContent = Route.useLoaderData();
@@ -127,8 +202,14 @@ function Index() {
   const stats = content.stats.length
     ? content.stats.map((s) => ({ value: s.value, label: s.label, sub: s.sub ?? "" }))
     : statsFallback;
-  const news = content.news.length
-    ? content.news.map((n) => ({ tag: n.tag ?? "", title: n.title, text: n.body ?? "" }))
+  const news: NewsItem[] = content.news.length
+    ? content.news.map((n) => ({
+        tag: n.tag ?? "",
+        title: n.title,
+        text: n.body ?? "",
+        mediaUrl: n.media_url ?? "",
+        mediaType: n.media_type,
+      }))
     : newsFallback;
   const requisitos = content.requirements.length
     ? content.requirements.map((r) => ({ n: r.num, t: r.title, d: r.description ?? "" }))
@@ -154,14 +235,51 @@ function Index() {
               height={44}
               className="h-11 w-11 rounded-md object-cover ring-1 ring-primary/50"
             />
-            <span className="font-display text-lg tracking-wide">{cfg["siteName"] || "THUG LIFE RJ"}</span>
+            <span className="font-display text-lg tracking-wide">
+              {cfg["siteName"] || "THUG LIFE RJ"}
+            </span>
           </a>
           <ul className="hidden items-center gap-8 text-sm font-semibold uppercase tracking-widest md:flex">
-            <li><a href="#home" className="text-muted-foreground transition-colors hover:text-primary">Início</a></li>
-            <li><a href="#noticias" className="text-muted-foreground transition-colors hover:text-primary">Notícias</a></li>
-            <li><a href="#jogar" className="text-muted-foreground transition-colors hover:text-primary">Jogar</a></li>
-            <li><a href="#duvidas" className="text-muted-foreground transition-colors hover:text-primary">Dúvidas</a></li>
-            <li><Link to="/regras" className="text-muted-foreground transition-colors hover:text-primary">Regras</Link></li>
+            <li>
+              <a
+                href="#home"
+                className="text-muted-foreground transition-colors hover:text-primary"
+              >
+                Início
+              </a>
+            </li>
+            <li>
+              <a
+                href="#noticias"
+                className="text-muted-foreground transition-colors hover:text-primary"
+              >
+                Notícias
+              </a>
+            </li>
+            <li>
+              <a
+                href="#jogar"
+                className="text-muted-foreground transition-colors hover:text-primary"
+              >
+                Jogar
+              </a>
+            </li>
+            <li>
+              <a
+                href="#duvidas"
+                className="text-muted-foreground transition-colors hover:text-primary"
+              >
+                Dúvidas
+              </a>
+            </li>
+            <li>
+              <Link
+                to="/regras"
+                className="text-muted-foreground transition-colors hover:text-primary"
+              >
+                Regras
+              </Link>
+            </li>
           </ul>
           <a
             href="#jogar"
@@ -173,17 +291,25 @@ function Index() {
       </header>
 
       <section id="home" className="relative flex min-h-screen items-center overflow-hidden">
-        <div className="pointer-events-none absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ background: "var(--gradient-hero)" }}
+        />
         <div className="relative mx-auto w-full max-w-6xl px-5 pt-28 pb-20">
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/60 bg-background/50 px-4 py-1 text-xs font-bold uppercase tracking-[0.25em] text-primary backdrop-blur">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
             {cfg["heroBadge"] || "Mais de 10 anos no Ar · TL Reina"}
           </span>
           <h1 className="mt-7 max-w-4xl font-display text-[2.6rem] uppercase leading-[0.92] tracking-tight sm:text-6xl lg:text-[5rem]">
-            <span className="block text-muted-foreground/80 text-[0.42em] tracking-[0.4em]">{cfg["heroKicker"] || "A cidade que não dorme"}</span>
+            <span className="block text-muted-foreground/80 text-[0.42em] tracking-[0.4em]">
+              {cfg["heroKicker"] || "A cidade que não dorme"}
+            </span>
             <span
               className="mt-3 block bg-clip-text text-transparent drop-shadow-[0_8px_30px_oklch(0.58_0.245_27/0.45)]"
-              style={{ backgroundImage: "linear-gradient(180deg, oklch(1 0 0) 35%, oklch(0.78 0.02 20) 100%)" }}
+              style={{
+                backgroundImage:
+                  "linear-gradient(180deg, oklch(1 0 0) 35%, oklch(0.78 0.02 20) 100%)",
+              }}
             >
               {cfg["heroTitle"] || "A Thug Life RJ"}
             </span>
@@ -235,7 +361,9 @@ function Index() {
       </section>
 
       <section id="noticias" className="mx-auto max-w-6xl px-5 py-24">
-        <h2 className="font-display text-4xl uppercase sm:text-5xl">{cfg["newsTitle"] || "Notícias da cidade"}</h2>
+        <h2 className="font-display text-4xl uppercase sm:text-5xl">
+          {cfg["newsTitle"] || "Notícias da cidade"}
+        </h2>
         <p className="mt-3 max-w-2xl text-muted-foreground">
           {cfg["newsSubtitle"] ||
             "Atualizações, eventos e bastidores do maior servidor com temática do Rio de Janeiro."}
@@ -246,9 +374,15 @@ function Index() {
               key={n.title}
               className="group relative overflow-hidden rounded-xl border border-border bg-card/80 shadow-[var(--shadow-card)] backdrop-blur-md transition-all hover:-translate-y-1 hover:border-primary/70 hover:shadow-[var(--shadow-glow)]"
             >
-              <div className="absolute inset-x-0 top-0 h-1" style={{ background: "var(--gradient-red)" }} />
+              <div
+                className="absolute inset-x-0 top-0 h-1"
+                style={{ background: "var(--gradient-red)" }}
+              />
+              {n.mediaUrl && <NewsMedia url={n.mediaUrl} type={n.mediaType} title={n.title} />}
               <div className="p-6">
-                <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">{n.tag}</span>
+                <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                  {n.tag}
+                </span>
                 <h3 className="mt-2 font-display text-xl uppercase leading-tight">{n.title}</h3>
                 <p className="mt-3 text-sm text-muted-foreground">{n.text}</p>
               </div>
@@ -257,9 +391,14 @@ function Index() {
         </div>
       </section>
 
-      <section id="jogar" className="border-y border-border bg-surface-elevated py-24 backdrop-blur-md">
+      <section
+        id="jogar"
+        className="border-y border-border bg-surface-elevated py-24 backdrop-blur-md"
+      >
         <div className="mx-auto max-w-6xl px-5">
-          <h2 className="font-display text-4xl uppercase sm:text-5xl">{cfg["playTitle"] || "Jogue com a gente"}</h2>
+          <h2 className="font-display text-4xl uppercase sm:text-5xl">
+            {cfg["playTitle"] || "Jogue com a gente"}
+          </h2>
           <p className="mt-3 max-w-2xl text-muted-foreground">
             {cfg["playSubtitle"] || "Requisitos para liberar seu personagem e entrar na cidade."}
           </p>
@@ -329,7 +468,9 @@ function Index() {
       </section>
 
       <section id="duvidas" className="mx-auto max-w-3xl px-5 py-24">
-        <h2 className="font-display text-4xl uppercase sm:text-5xl">{cfg["faqTitle"] || "Dúvidas frequentes"}</h2>
+        <h2 className="font-display text-4xl uppercase sm:text-5xl">
+          {cfg["faqTitle"] || "Dúvidas frequentes"}
+        </h2>
         <div className="mt-8 space-y-3">
           {faq.map((f, i) => (
             <div
@@ -379,7 +520,8 @@ function Index() {
             ))}
           </ul>
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Thug Life RJ. Servidor de roleplay não afiliado à Rockstar Games ou Take-Two.
+            © {new Date().getFullYear()} Thug Life RJ. Servidor de roleplay não afiliado à Rockstar
+            Games ou Take-Two.
           </p>
         </div>
       </footer>

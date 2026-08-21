@@ -16,15 +16,25 @@ export function wallpapersFromSettings(settings: Record<string, string>): string
   return list.length ? list : DEFAULT_WALLPAPERS;
 }
 
+export function wallpaperIntervalFromSettings(settings: Record<string, string>): number {
+  const seconds = Number(settings["wallpaperInterval"] ?? 3);
+  return Number.isFinite(seconds) ? Math.max(1, Math.min(300, Math.floor(seconds))) * 1000 : 3000;
+}
+
 export function SiteBackground({ settings }: { settings: Record<string, string> }) {
   const slides = wallpapersFromSettings(settings);
+  const interval = wallpaperIntervalFromSettings(settings);
   const [active, setActive] = useState(0);
 
   useEffect(() => {
     if (slides.length < 2) return;
-    const id = window.setInterval(() => setActive((i) => (i + 1) % slides.length), 3000);
+    const id = window.setInterval(() => setActive((i) => (i + 1) % slides.length), interval);
     return () => window.clearInterval(id);
-  }, [slides.length]);
+  }, [slides.length, interval]);
+
+  useEffect(() => {
+    if (active >= slides.length) setActive(0);
+  }, [active, slides.length]);
 
   return (
     <div aria-hidden className="fixed inset-0 -z-10 overflow-hidden bg-background">
@@ -45,7 +55,10 @@ export function SiteBackground({ settings }: { settings: Record<string, string> 
       <div className="tl-scanlines absolute inset-0 opacity-40 mix-blend-overlay" />
       <div
         className="absolute inset-0"
-        style={{ background: "radial-gradient(100% 100% at 50% 50%, transparent 45%, oklch(0 0 0 / 0.85) 100%)" }}
+        style={{
+          background:
+            "radial-gradient(100% 100% at 50% 50%, transparent 45%, oklch(0 0 0 / 0.85) 100%)",
+        }}
       />
     </div>
   );
