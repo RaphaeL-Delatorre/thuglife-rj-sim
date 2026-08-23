@@ -159,7 +159,7 @@ export function Toolbar({
       disabled={disabled}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
-      className={`flex h-8 min-w-8 items-center justify-center gap-1 rounded px-2 transition-colors ${
+      className={`flex h-8 min-w-8 items-center justify-center gap-1 rounded-md px-2 transition-all ${
         active
           ? "bg-primary text-primary-foreground shadow-sm"
           : danger
@@ -181,7 +181,9 @@ export function Toolbar({
     setCustomSizeOpen(false);
   };
 
-  const Divider = () => <span className="mx-1 h-5 w-px shrink-0 bg-border/80" />;
+  const Divider = () => (
+    <span className="mx-1.5 h-6 w-px shrink-0 bg-gradient-to-b from-transparent via-border to-transparent" />
+  );
   const Ico = ({ children }: { children: React.ReactNode }) => (
     <span className="[&>svg]:h-4 [&>svg]:w-4">{children}</span>
   );
@@ -192,7 +194,7 @@ export function Toolbar({
   );
 
   return (
-    <div className="flex flex-col border-b border-border bg-secondary/40 backdrop-blur-sm">
+    <div className="flex flex-col overflow-hidden rounded-t-xl border-b border-border bg-secondary/40 shadow-sm backdrop-blur-sm">
       {/* Upper bar: View mode tabs, preview viewport, tools and inspector trigger */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/50 bg-background/40 px-3 py-1.5">
         <div className="flex items-center gap-1">
@@ -306,7 +308,7 @@ export function Toolbar({
       </div>
 
       {/* Main Editing Toolbar */}
-      <div className="scrollbar-thin flex flex-wrap items-center gap-1 overflow-x-auto p-2">
+      <div className="scrollbar-thin flex flex-wrap items-center gap-1 overflow-x-auto bg-gradient-to-b from-secondary/50 to-background/20 px-3 py-2.5">
         {/* History / Undo / Redo / Format Painter */}
         <TB title="Desfazer (Ctrl+Z)" onClick={() => onExecCommand("undo")}>
           <Ico>
@@ -584,7 +586,86 @@ export function Toolbar({
 
         <Divider />
 
+        {/* Blocos prontos de Regras (layout do site) */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="flex h-8 items-center gap-1.5 rounded-md border border-primary bg-primary px-2.5 text-xs font-bold text-primary-foreground shadow-sm transition-all hover:brightness-110"
+            >
+              <Scale className="h-4 w-4" />
+              <span>Blocos de Regras</span>
+              <ChevronDown className="h-3 w-3 opacity-80" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="z-50 max-h-96 w-72 overflow-y-auto border border-border bg-popover/95 backdrop-blur">
+            <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Estrutura das regras
+            </DropdownMenuLabel>
+            {(
+              [
+                ["bc-section", "Seção completa (título + regras)", "Ex.: 1. Acesso à Cidade", <Layers key="i" />],
+                ["bc-rule", "Item de regra (1.1 – texto)", "Número em vermelho + texto", <Scale key="i" />],
+                ["bc-rule-sub", "Item de regra com subitens a) b)", "Regra com alíneas", <List key="i" />],
+                ["bc-arrows", "Lista com setas ➤", "Setas vermelhas do site", <ListChecks key="i" />],
+              ] as const
+            ).map(([key, label, desc, icon]) => (
+              <DropdownMenuItem key={key} onClick={() => onInsertComponent(key)}>
+                <MIcon>{icon}</MIcon>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold">{label}</span>
+                  <span className="text-[10px] text-muted-foreground">{desc}</span>
+                </div>
+              </DropdownMenuItem>
+            ))}
+
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Caixas de destaque
+            </DropdownMenuLabel>
+            {(
+              [
+                ["bc-important", "Caixa IMPORTANTE", "Faixa vermelha centralizada", <TriangleAlert key="i" />],
+                ["bc-obs", "Caixa OBS", "Observação tracejada", <Info key="i" />],
+                ["bc-consequence", "Caixa CONSEQUÊNCIA", "Punição da regra", <Ban key="i" />],
+                ["bc-time", "Caixa de tempo / limite", "Ex.: Tempo Máximo", <Zap key="i" />],
+                ["bc-hl", "Destaque no texto", "Realce vermelho arredondado", <Highlighter key="i" />],
+              ] as const
+            ).map(([key, label, desc, icon]) => (
+              <DropdownMenuItem key={key} onClick={() => onInsertComponent(key)}>
+                <MIcon>{icon}</MIcon>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold">{label}</span>
+                  <span className="text-[10px] text-muted-foreground">{desc}</span>
+                </div>
+              </DropdownMenuItem>
+            ))}
+
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Ações do servidor
+            </DropdownMenuLabel>
+            {(
+              [
+                ["bc-action", "Ação expansível (menu)", "Emoji + participantes + regras", <Swords key="i" />],
+                ["bc-participants", "Caixa de participantes", "💀 Bandidos / 🚔 Polícia", <Sparkles key="i" />],
+              ] as const
+            ).map(([key, label, desc, icon]) => (
+              <DropdownMenuItem key={key} onClick={() => onInsertComponent(key)}>
+                <MIcon>{icon}</MIcon>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold">{label}</span>
+                  <span className="text-[10px] text-muted-foreground">{desc}</span>
+                </div>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Divider />
+
         {/* + Adicionar Componente Dropdown */}
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button

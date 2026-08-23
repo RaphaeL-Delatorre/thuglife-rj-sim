@@ -503,6 +503,124 @@ export function RichTextEditor({
   const handleInsertComponent = useCallback(
     (type: string) => {
       switch (type) {
+        // ===== Blocos no estilo do site de regras (BC) =====
+        case "bc-section": {
+          const title = window.prompt("Título da seção", "1. Acesso à Cidade") ?? "Nova Seção";
+          insertHTML(`
+            <div class="bc-section">
+              <h3 class="bc-section-title">${title}</h3>
+              <div class="bc-rule"><strong>1.1</strong> – Escreva aqui o texto da regra.</div>
+              <div class="bc-rule"><strong>1.2</strong> – Escreva aqui o texto da regra.</div>
+            </div>
+            <p><br></p>
+          `);
+          break;
+        }
+        case "bc-rule": {
+          const code = window.prompt("Número da regra (ex.: 1.1)", "1.1") ?? "1.1";
+          insertHTML(
+            `<div class="bc-rule"><strong>${code}</strong> – Escreva aqui o texto da regra.</div><p><br></p>`,
+          );
+          break;
+        }
+        case "bc-rule-sub": {
+          const code = window.prompt("Número da regra (ex.: 1.4)", "1.4") ?? "1.4";
+          insertHTML(`
+            <div class="bc-rule"><strong>${code}</strong> – Escreva aqui o texto da regra.
+              <ul class="bc-sub">
+                <li><strong>a)</strong> Primeiro subitem.</li>
+                <li><strong>b)</strong> Segundo subitem.</li>
+              </ul>
+            </div>
+            <p><br></p>
+          `);
+          break;
+        }
+        case "bc-arrows": {
+          insertHTML(`
+            <ul class="bc-arrows">
+              <li>Primeiro item da lista.</li>
+              <li>Segundo item da lista.</li>
+              <li>Terceiro item da lista.</li>
+            </ul>
+            <p><br></p>
+          `);
+          break;
+        }
+        case "bc-hl": {
+          insertHTML(`<span class="bc-hl">TEXTO EM DESTAQUE</span>&nbsp;`);
+          break;
+        }
+        case "bc-obs": {
+          insertHTML(
+            `<div class="bc-obs"><strong>OBS:</strong> Escreva aqui a observação desta regra.</div><p><br></p>`,
+          );
+          break;
+        }
+        case "bc-important": {
+          const title = window.prompt("Título da caixa", "IMPORTANTE") ?? "IMPORTANTE";
+          insertHTML(`
+            <div class="bc-important">
+              <span class="bc-important-title">${title}</span>
+              Escreva aqui a mensagem que deve chamar atenção do jogador.
+            </div>
+            <p><br></p>
+          `);
+          break;
+        }
+        case "bc-consequence": {
+          insertHTML(`
+            <div class="bc-consequence">
+              <span class="bc-consequence-title">⚠️ Consequência</span>
+              Descreva a punição aplicada em caso de descumprimento.
+            </div>
+            <p><br></p>
+          `);
+          break;
+        }
+        case "bc-time": {
+          insertHTML(
+            `<div class="bc-time">Tempo Máximo: <span>10 minutos</span></div><p><br></p>`,
+          );
+          break;
+        }
+        case "bc-participants": {
+          const bandidos = window.prompt("Quantidade de bandidos", "8") ?? "8";
+          const policia = window.prompt("Quantidade de policiais", "10") ?? "10";
+          insertHTML(`
+            <div class="bc-participants">
+              <div class="bc-participant"><span>💀</span> <strong>Bandidos: ${bandidos}</strong></div>
+              <div class="bc-participant"><span>🚔</span> <strong>Polícia: ${policia}</strong></div>
+            </div>
+            <p><br></p>
+          `);
+          break;
+        }
+        case "bc-action": {
+          const icon = window.prompt("Emoji da ação", "🏦") ?? "🏦";
+          const name = window.prompt("Nome da ação", "Banco Central") ?? "Ação";
+          const bandidos = window.prompt("Quantidade de bandidos", "10") ?? "10";
+          const policia = window.prompt("Quantidade de policiais", "12") ?? "12";
+          insertHTML(`
+            <details class="bc-action">
+              <summary><span>${icon}</span> ${name}</summary>
+              <div class="bc-action-body">
+                <div class="bc-participants">
+                  <div class="bc-participant"><span>💀</span> <strong>Bandidos: ${bandidos}</strong></div>
+                  <div class="bc-participant"><span>🚔</span> <strong>Polícia: ${policia}</strong></div>
+                </div>
+                <ul class="bc-arrows">
+                  <li>Regra da ação número um.</li>
+                  <li>Regra da ação número dois.</li>
+                </ul>
+                <div class="bc-obs"><strong>OBS:</strong> Observação sobre esta ação.</div>
+              </div>
+            </details>
+            <p><br></p>
+          `);
+          break;
+        }
+
         case "rule": {
           const code = window.prompt("Código da regra (ex.: 1.1)", "1.1") ?? "1.1";
           const title =
