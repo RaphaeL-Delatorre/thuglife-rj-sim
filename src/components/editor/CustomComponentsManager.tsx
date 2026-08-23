@@ -16,7 +16,7 @@ const DEFAULT_SAVED_COMPONENTS: SavedComponentPreset[] = [
     icon: "⚖️",
     html: `<div class="rc-rule-card" style="border:1px solid #ef4444;background:#ef444414;border-radius:0.8rem;padding:1.1rem;margin:1rem 0;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
-        <span class="rc-rule-code" style="color:#ef4444;font-weight:800;font-size:1.1rem;">⚖️ 1.1 — METAGAMING</span>
+        <span class="rc-rule-code" style="color:#ef4444;font-weight:700;font-size:1.1rem;">⚖️ 1.1 — METAGAMING</span>
         <span class="rc-badge" style="border-color:#ef4444;background:#ef444426;color:#ef4444;font-size:0.75rem;padding:0.15rem 0.6rem;border-radius:0.35rem;font-weight:700;">PROIBIDO</span>
       </div>
       <p style="margin:0 0 0.6rem;color:var(--foreground);font-size:0.95rem;line-height:1.6;">
@@ -55,7 +55,7 @@ const DEFAULT_SAVED_COMPONENTS: SavedComponentPreset[] = [
     icon: "⚖️",
     html: `<div class="rc-compare-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin:1.5rem 0;">
       <div style="border:1px solid #22c55e;background:#22c55e12;border-radius:0.8rem;padding:1rem;">
-        <h4 style="color:#22c55e;font-weight:800;font-size:0.95rem;margin:0 0 0.6rem;display:flex;align-items:center;gap:0.4rem;">
+        <h4 style="color:#22c55e;font-weight:700;font-size:0.95rem;margin:0 0 0.6rem;display:flex;align-items:center;gap:0.4rem;">
           <span>✓</span> PERMITIDO
         </h4>
         <ul style="list-style:none;padding-left:0;margin:0;font-size:0.88rem;line-height:1.6;color:var(--foreground);">
@@ -65,7 +65,7 @@ const DEFAULT_SAVED_COMPONENTS: SavedComponentPreset[] = [
         </ul>
       </div>
       <div style="border:1px solid #ef4444;background:#ef444412;border-radius:0.8rem;padding:1rem;">
-        <h4 style="color:#ef4444;font-weight:800;font-size:0.95rem;margin:0 0 0.6rem;display:flex;align-items:center;gap:0.4rem;">
+        <h4 style="color:#ef4444;font-weight:700;font-size:0.95rem;margin:0 0 0.6rem;display:flex;align-items:center;gap:0.4rem;">
           <span>✕</span> PROIBIDO
         </h4>
         <ul style="list-style:none;padding-left:0;margin:0;font-size:0.88rem;line-height:1.6;color:var(--foreground);">

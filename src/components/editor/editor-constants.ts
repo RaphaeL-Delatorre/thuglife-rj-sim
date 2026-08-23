@@ -1,9 +1,7 @@
 export const FONTS = [
   { label: "Padrão do site", value: "inherit" },
-  { label: "Barlow (Moderna/RP)", value: "Barlow, system-ui, sans-serif" },
-  { label: "Anton (Títulos Fortes)", value: "Anton, Impact, 'Arial Black', sans-serif" },
+  { label: "Poppins (Padrão do site)", value: "Poppins, sans-serif" },
   { label: "Inter (UI Clean)", value: "Inter, system-ui, sans-serif" },
-  { label: "Poppins (Geométrica)", value: "Poppins, system-ui, sans-serif" },
   { label: "Montserrat (Elegante)", value: "Montserrat, system-ui, sans-serif" },
   { label: "Roboto (Legível)", value: "Roboto, system-ui, sans-serif" },
   { label: "Arial", value: "Arial, Helvetica, sans-serif" },

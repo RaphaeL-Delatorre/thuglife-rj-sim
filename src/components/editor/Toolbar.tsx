@@ -677,7 +677,10 @@ export function Toolbar({
               <ChevronDown className="h-3 w-3 opacity-70" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="z-50 max-h-96 w-64 overflow-y-auto border border-border bg-popover/95 backdrop-blur">
+          <DropdownMenuContent
+            className="z-50 max-h-96 w-64 overflow-y-auto border border-border bg-popover/95 backdrop-blur"
+            onOpenAutoFocus={(event) => event.preventDefault()}
+          >
             <DropdownMenuLabel className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
               Regras &amp; RP
             </DropdownMenuLabel>

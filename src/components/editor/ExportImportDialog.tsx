@@ -99,7 +99,7 @@ export function ExportImportDialog({
         <head>
           <title>Documento de Regras</title>
           <style>
-            body { font-family: system-ui, sans-serif; line-height: 1.6; color: #111; max-width: 800px; margin: 40px auto; padding: 0 20px; }
+            body { font-family: Poppins, sans-serif; line-height: 1.6; color: #111; max-width: 800px; margin: 40px auto; padding: 0 20px; }
             h1, h2, h3, h4 { color: #8b5cf6; text-transform: uppercase; }
             .rc-frame, .rc-callout { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin: 15px 0; }
             table { width: 100%; border-collapse: collapse; margin: 15px 0; }

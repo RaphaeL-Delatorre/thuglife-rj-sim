@@ -636,7 +636,7 @@ export function RichTextEditor({
           insertHTML(`
             <div class="rc-rule-card" style="border:1px solid ${color}60;background:${color}10;border-radius:0.85rem;padding:1.2rem;margin:1.2rem 0;box-shadow:0 0 15px ${color}15;">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;flex-wrap:wrap;gap:0.5rem;">
-                <span class="rc-rule-code" style="color:${color};font-weight:800;font-size:1.1rem;font-family:var(--font-display);letter-spacing:0.04em;">
+                <span class="rc-rule-code" style="color:${color};font-weight:700;font-size:1.1rem;font-family:var(--font-display);letter-spacing:0.04em;">
                   ⚖️ ${code} — ${title.toUpperCase()}
                 </span>
                 <span class="rc-badge" style="border:1px solid ${color};background:${color}25;color:${color};font-size:0.75rem;padding:0.15rem 0.6rem;border-radius:0.35rem;font-weight:700;">
@@ -688,7 +688,7 @@ export function RichTextEditor({
           insertHTML(`
             <div class="rc-compare-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin:1.5rem 0;">
               <div style="border:1px solid #22c55e;background:#22c55e12;border-radius:0.85rem;padding:1.1rem;box-shadow:0 0 15px rgba(34,197,94,0.1);">
-                <h4 style="color:#22c55e;font-weight:800;font-size:0.95rem;margin:0 0 0.6rem;display:flex;align-items:center;gap:0.4rem;font-family:var(--font-display);letter-spacing:0.05em;">
+                <h4 style="color:#22c55e;font-weight:700;font-size:0.95rem;margin:0 0 0.6rem;display:flex;align-items:center;gap:0.4rem;font-family:var(--font-display);letter-spacing:0.05em;">
                   <span>✓</span> PERMITIDO
                 </h4>
                 <ul style="list-style:none;padding-left:0;margin:0;font-size:0.88rem;line-height:1.65;color:var(--foreground);">
@@ -698,7 +698,7 @@ export function RichTextEditor({
                 </ul>
               </div>
               <div style="border:1px solid #ef4444;background:#ef444412;border-radius:0.85rem;padding:1.1rem;box-shadow:0 0 15px rgba(239,68,68,0.1);">
-                <h4 style="color:#ef4444;font-weight:800;font-size:0.95rem;margin:0 0 0.6rem;display:flex;align-items:center;gap:0.4rem;font-family:var(--font-display);letter-spacing:0.05em;">
+                <h4 style="color:#ef4444;font-weight:700;font-size:0.95rem;margin:0 0 0.6rem;display:flex;align-items:center;gap:0.4rem;font-family:var(--font-display);letter-spacing:0.05em;">
                   <span>✕</span> PROIBIDO
                 </h4>
                 <ul style="list-style:none;padding-left:0;margin:0;font-size:0.88rem;line-height:1.65;color:var(--foreground);">
