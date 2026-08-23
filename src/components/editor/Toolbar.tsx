@@ -159,7 +159,7 @@ export function Toolbar({
       disabled={disabled}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
-      className={`flex h-8 min-w-8 items-center justify-center gap-1 rounded px-2 transition-colors ${
+      className={`flex h-8 min-w-8 items-center justify-center gap-1 rounded-md px-2 transition-all ${
         active
           ? "bg-primary text-primary-foreground shadow-sm"
           : danger
@@ -181,7 +181,9 @@ export function Toolbar({
     setCustomSizeOpen(false);
   };
 
-  const Divider = () => <span className="mx-1 h-5 w-px shrink-0 bg-border/80" />;
+  const Divider = () => (
+    <span className="mx-1.5 h-6 w-px shrink-0 bg-gradient-to-b from-transparent via-border to-transparent" />
+  );
   const Ico = ({ children }: { children: React.ReactNode }) => (
     <span className="[&>svg]:h-4 [&>svg]:w-4">{children}</span>
   );
@@ -192,7 +194,7 @@ export function Toolbar({
   );
 
   return (
-    <div className="flex flex-col border-b border-border bg-secondary/40 backdrop-blur-sm">
+    <div className="flex flex-col overflow-hidden rounded-t-xl border-b border-border bg-secondary/40 shadow-sm backdrop-blur-sm">
       {/* Upper bar: View mode tabs, preview viewport, tools and inspector trigger */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/50 bg-background/40 px-3 py-1.5">
         <div className="flex items-center gap-1">
@@ -306,7 +308,7 @@ export function Toolbar({
       </div>
 
       {/* Main Editing Toolbar */}
-      <div className="scrollbar-thin flex flex-wrap items-center gap-1 overflow-x-auto p-2">
+      <div className="scrollbar-thin flex flex-wrap items-center gap-1 overflow-x-auto bg-gradient-to-b from-secondary/50 to-background/20 px-3 py-2.5">
         {/* History / Undo / Redo / Format Painter */}
         <TB title="Desfazer (Ctrl+Z)" onClick={() => onExecCommand("undo")}>
           <Ico>
