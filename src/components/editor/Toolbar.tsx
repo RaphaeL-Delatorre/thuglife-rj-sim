@@ -584,7 +584,86 @@ export function Toolbar({
 
         <Divider />
 
+        {/* Blocos prontos de Regras (layout do site) */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="flex h-8 items-center gap-1.5 rounded-md border border-primary bg-primary px-2.5 text-xs font-bold text-primary-foreground shadow-sm transition-all hover:brightness-110"
+            >
+              <Scale className="h-4 w-4" />
+              <span>Blocos de Regras</span>
+              <ChevronDown className="h-3 w-3 opacity-80" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="z-50 max-h-96 w-72 overflow-y-auto border border-border bg-popover/95 backdrop-blur">
+            <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Estrutura das regras
+            </DropdownMenuLabel>
+            {(
+              [
+                ["bc-section", "Seção completa (título + regras)", "Ex.: 1. Acesso à Cidade", <Layers key="i" />],
+                ["bc-rule", "Item de regra (1.1 – texto)", "Número em vermelho + texto", <Scale key="i" />],
+                ["bc-rule-sub", "Item de regra com subitens a) b)", "Regra com alíneas", <List key="i" />],
+                ["bc-arrows", "Lista com setas ➤", "Setas vermelhas do site", <ListChecks key="i" />],
+              ] as const
+            ).map(([key, label, desc, icon]) => (
+              <DropdownMenuItem key={key} onClick={() => onInsertComponent(key)}>
+                <MIcon>{icon}</MIcon>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold">{label}</span>
+                  <span className="text-[10px] text-muted-foreground">{desc}</span>
+                </div>
+              </DropdownMenuItem>
+            ))}
+
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Caixas de destaque
+            </DropdownMenuLabel>
+            {(
+              [
+                ["bc-important", "Caixa IMPORTANTE", "Faixa vermelha centralizada", <TriangleAlert key="i" />],
+                ["bc-obs", "Caixa OBS", "Observação tracejada", <Info key="i" />],
+                ["bc-consequence", "Caixa CONSEQUÊNCIA", "Punição da regra", <Ban key="i" />],
+                ["bc-time", "Caixa de tempo / limite", "Ex.: Tempo Máximo", <Zap key="i" />],
+                ["bc-hl", "Destaque no texto", "Realce vermelho arredondado", <Highlighter key="i" />],
+              ] as const
+            ).map(([key, label, desc, icon]) => (
+              <DropdownMenuItem key={key} onClick={() => onInsertComponent(key)}>
+                <MIcon>{icon}</MIcon>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold">{label}</span>
+                  <span className="text-[10px] text-muted-foreground">{desc}</span>
+                </div>
+              </DropdownMenuItem>
+            ))}
+
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Ações do servidor
+            </DropdownMenuLabel>
+            {(
+              [
+                ["bc-action", "Ação expansível (menu)", "Emoji + participantes + regras", <Swords key="i" />],
+                ["bc-participants", "Caixa de participantes", "💀 Bandidos / 🚔 Polícia", <Sparkles key="i" />],
+              ] as const
+            ).map(([key, label, desc, icon]) => (
+              <DropdownMenuItem key={key} onClick={() => onInsertComponent(key)}>
+                <MIcon>{icon}</MIcon>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold">{label}</span>
+                  <span className="text-[10px] text-muted-foreground">{desc}</span>
+                </div>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Divider />
+
         {/* + Adicionar Componente Dropdown */}
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
