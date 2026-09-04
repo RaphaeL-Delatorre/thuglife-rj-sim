@@ -280,6 +280,16 @@ function Index() {
                 Regras
               </Link>
             </li>
+            <li>
+              <a
+                href="https://loja.equipetl.com/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-muted-foreground transition-colors hover:text-primary"
+              >
+                Loja
+              </a>
+            </li>
           </ul>
           <a
             href="#jogar"

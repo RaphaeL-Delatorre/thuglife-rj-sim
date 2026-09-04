@@ -99,6 +99,12 @@ const CATEGORY_FIELDS: FieldDef[] = [
     hint: "Aparece no fim da página, fora da moldura dos menus.",
   },
   { key: "published", label: "Publicada no site", type: "switch" },
+  {
+    key: "hidden",
+    label: "Oculta (apenas com o link)",
+    type: "switch",
+    hint: "Quando marcada, a categoria não aparece na lista de \"Categorias de Regras\", mas continua acessível por quem tiver o link.",
+  },
   { key: "sort_order", label: "Ordem", type: "number" },
 ];
 
@@ -508,6 +514,7 @@ function DashboardPage() {
                     { key: "name", label: "Nome" },
                     { key: "slug", label: "Endereço" },
                     { key: "published", label: "Publicada" },
+                    { key: "hidden", label: "Oculta" },
                     { key: "sort_order", label: "Ordem" },
                   ]}
                   can={allow}
