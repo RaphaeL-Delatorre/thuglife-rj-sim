@@ -194,6 +194,7 @@ export type Database = {
         Row: {
           content_html: string
           description: string
+          hidden: boolean
           icon: string
           id: string
           intro_html: string
@@ -207,6 +208,7 @@ export type Database = {
         Insert: {
           content_html?: string
           description?: string
+          hidden?: boolean
           icon?: string
           id?: string
           intro_html?: string
@@ -220,6 +222,7 @@ export type Database = {
         Update: {
           content_html?: string
           description?: string
+          hidden?: boolean
           icon?: string
           id?: string
           intro_html?: string
