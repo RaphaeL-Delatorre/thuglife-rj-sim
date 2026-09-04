@@ -273,6 +273,16 @@ function Index() {
               </a>
             </li>
             <li>
+              <a
+                href="https://loja.equipetl.com/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-muted-foreground transition-colors hover:text-primary"
+              >
+                Loja
+              </a>
+            </li>
+            <li>
               <Link
                 to="/regras"
                 className="text-muted-foreground transition-colors hover:text-primary"
