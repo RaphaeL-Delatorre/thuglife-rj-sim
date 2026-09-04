@@ -142,7 +142,7 @@ function RegrasPage() {
         {cfg["rulesTopHtml"] && <RichContent html={cfg["rulesTopHtml"]} className="mt-8" />}
 
         <div className="mt-8 space-y-8 rounded-2xl border border-border bg-card/70 p-6 shadow-[var(--shadow-glow)] backdrop-blur-md sm:p-8">
-          <Menu title={cfg["termsTitle"] || "Termos e Condições de Uso"} icon="📘" defaultOpen={busca.length > 0}>
+          <Menu title={cfg["termsTitle"] || "Termos e Condições de Uso"} icon="📘">
             {termos.length === 0 ? (
               <p className="text-sm text-muted-foreground">Conteúdo em atualização.</p>
             ) : (
