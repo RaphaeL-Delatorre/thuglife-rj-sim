@@ -10,6 +10,9 @@ import type { RuleCategoryPage } from "@/lib/site.functions";
 const logoImg = logoAsset.url;
 
 export const Route = createFileRoute("/regras/$slug")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    q: typeof search["q"] === "string" ? (search["q"] as string) : "",
+  }),
   loader: async ({ params }) => {
     const data = await getRuleCategory({ data: { slug: params.slug } });
     if (!data.category) throw notFound();
@@ -65,6 +68,14 @@ function Shell({ children, settings }: { children: React.ReactNode; settings?: R
             >
               Início
             </Link>
+            <a
+              href="https://loja.equipetl.com/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm font-semibold uppercase tracking-widest text-muted-foreground transition-colors hover:text-primary"
+            >
+              Loja
+            </a>
           </div>
         </nav>
       </header>
@@ -151,7 +162,8 @@ function Secao({
 
 function CategoriaPage() {
   const { category, sections, rules, settings }: RuleCategoryPage = Route.useLoaderData();
-  const [busca, setBusca] = useState("");
+  const { q } = Route.useSearch();
+  const [busca, setBusca] = useState(q);
   if (!category) return <Fallback title="Categoria não encontrada" />;
 
   return (
@@ -198,7 +210,7 @@ function CategoriaPage() {
             title={s.title}
             icon={s.icon}
             bodyHtml={s.body_html}
-            defaultOpen={index === 0}
+            defaultOpen={index === 0 || busca.trim().length > 0}
             busca={busca}
             itens={rules
               .filter((r) => r.section_id === s.id)
