@@ -195,6 +195,7 @@ function RegrasPage() {
                   key={c.slug}
                   to="/regras/$slug"
                   params={{ slug: c.slug }}
+                  search={{ q: "" }}
                   className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-3 text-center text-sm font-bold text-primary-foreground transition-transform hover:scale-[1.03]"
                 >
                   {c.icon && <span aria-hidden>{c.icon}</span>}
