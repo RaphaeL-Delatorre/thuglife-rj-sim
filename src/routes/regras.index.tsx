@@ -4,6 +4,7 @@ import { useState } from "react";
 import logoAsset from "@/assets/logo-tl.png.asset.json";
 import { SiteBackground } from "@/components/SiteBackground";
 import { RichContent } from "@/components/editor/RichContent";
+import { RulesSearch } from "@/components/RulesSearch";
 import { getSiteContent } from "@/lib/site.functions";
 import type { SiteContent } from "@/lib/site.functions";
 
@@ -64,8 +65,7 @@ function Menu({
 function RegrasPage() {
   const content: SiteContent = Route.useLoaderData();
   const cfg = content.settings;
-  const [busca, setBusca] = useState("");
-  const termo = busca.trim().toLowerCase();
+  const termo = "";
   const match = (...parts: (string | null | undefined)[]) =>
     !termo || parts.some((p) => (p ?? "").toLowerCase().includes(termo));
 
@@ -73,7 +73,9 @@ function RegrasPage() {
     .filter((s) => !s.category_id && s.block === "termos")
     .sort((a, b) => a.sort_order - b.sort_order);
 
-  const categorias = content.categories.filter((c) => match(c.name, c.subtitle, c.description));
+  const categorias = content.categories.filter(
+    (c) => !c.hidden && match(c.name, c.subtitle, c.description),
+  );
 
 
   const portes: string[] = [];
@@ -105,6 +107,14 @@ function RegrasPage() {
               Início
             </Link>
             <a
+              href="https://loja.equipetl.com/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm font-semibold uppercase tracking-widest text-muted-foreground transition-colors hover:text-primary"
+            >
+              Loja
+            </a>
+            <a
               href={cfg["connectUrl"] || "fivem://connect/fivem.equipetl.com"}
               className="rounded-md bg-primary px-4 py-2 text-sm font-bold uppercase tracking-wider text-primary-foreground transition-transform hover:scale-105"
             >
@@ -125,17 +135,8 @@ function RegrasPage() {
           />
         </div>
 
-        <div className="mt-8 rounded-xl border border-border bg-card/80 p-5 backdrop-blur-md">
-          <label htmlFor="busca" className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
-            🔍 Pesquisar nesta categoria
-          </label>
-          <input
-            id="busca"
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Digite uma palavra ou termo..."
-            className="mt-3 w-full rounded-md border border-input bg-background/60 px-4 py-3 text-sm outline-none transition-colors focus:border-primary"
-          />
+        <div className="mt-8">
+          <RulesSearch content={content} />
         </div>
 
         {cfg["rulesTopHtml"] && <RichContent html={cfg["rulesTopHtml"]} className="mt-8" />}
